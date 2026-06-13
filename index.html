@@ -122,6 +122,45 @@
   .stat-warn{color:var(--warn);}
   .stat-bad{color:var(--bad);}
 
+  /* Vitals: boxed note + collapsible */
+  .vitals-note{font-size:11.5px;line-height:1.55;color:var(--muted);
+    background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--accent);
+    border-radius:8px;padding:9px 11px;margin-bottom:14px;}
+  details.vitbox{margin:0;}
+  details.vitbox > summary{display:flex;align-items:center;justify-content:space-between;gap:8px;
+    cursor:pointer;list-style:none;margin-bottom:14px;}
+  details.vitbox > summary::-webkit-details-marker{display:none;}
+  details.vitbox > summary h4{margin:0;}
+  .vit-chev{width:18px;height:18px;color:var(--muted);transition:transform .2s;flex:none;}
+  details.vitbox[open] > summary .vit-chev{transform:rotate(180deg);}
+
+  /* How-to box on home */
+  .howto{text-align:left;background:var(--panel2);border:1px solid var(--line);border-radius:12px;
+    padding:4px 16px;margin:0 auto 20px;max-width:640px;}
+  .howto > summary{display:flex;align-items:center;gap:8px;cursor:pointer;list-style:none;
+    font-weight:700;font-size:14.5px;color:var(--accent2);padding:11px 0;}
+  .howto > summary::-webkit-details-marker{display:none;}
+  .howto > summary .vit-chev{margin-left:auto;}
+  .howto[open] > summary .vit-chev{transform:rotate(180deg);}
+  .howto-body{font-size:13px;line-height:1.7;color:var(--muted);padding:2px 0 14px;}
+  .howto-body p{margin:0 0 9px;}
+  .howto-body b{color:var(--txt);}
+
+  /* Mobile polish */
+  @media(max-width:560px){
+    .wrap{padding:14px 12px 48px;}
+    .card{padding:18px 15px;border-radius:14px;}
+    .hero .big{font-size:28px;}
+    .hero .tag{font-size:14px;margin:8px 0 20px;}
+    .btn{width:100%;padding:15px 20px;font-size:15.5px;justify-content:center;}
+    .home-btns{flex-direction:column;gap:10px;}
+    .actions{flex-direction:column;}
+    .actions .btn{width:100%;}
+    .title{font-size:21px;}
+    .opt{padding:14px 15px;}
+    .modal{padding:18px 16px;}
+  }
+
   .scene{font-size:13px;color:var(--accent2);font-weight:700;letter-spacing:1px;margin-bottom:4px;}
   .ptline{font-size:13px;color:var(--muted);margin-bottom:18px;}
   .qbox{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:16px;}
@@ -258,6 +297,12 @@
     max-width:640px;margin:0 auto 22px;display:grid;grid-template-columns:1fr 1fr;gap:14px;text-align:left;
   }
   @media(max-width:560px){.learner-box{grid-template-columns:1fr;}}
+  .name-panel{max-width:640px;margin:0 auto 18px;}
+  .name-panel .learner-box{margin:0 auto;}
+  .name-note{font-size:12.5px;line-height:1.6;color:var(--muted);background:var(--panel2);
+    border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:9px;
+    padding:10px 13px;margin-bottom:14px;text-align:left;}
+  .name-note b{color:var(--txt);}
   .learner-field label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:6px;letter-spacing:.3px;}
   .learner-field input{
     width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:11px;
@@ -317,7 +362,7 @@
     body{background:#fff!important;color:#111!important;}
     .wrap{max-width:none;padding:0;margin:0;}
     /* hide all app chrome and every non-report screen */
-    header.topbar, footer, .home-btns, .learner-box, .actions, .overlay,
+    header.topbar, footer, .home-btns, .learner-box, .name-panel, .actions, .overlay,
     #screen-start, #screen-levels, #screen-play, #screen-done,
     #screen-final, #screen-refs, #screen-rapid, #screen-review, .disclaimer{
       display:none!important;
@@ -376,18 +421,18 @@
       <p style="margin-top:10px;">真正的挑戰才剛開始：接下來 <b>0h <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="12" x2="19" y2="12"/><polyline points="12.5 5.5 19 12 12.5 18.5"/></svg> 6h <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="12" x2="19" y2="12"/><polyline points="12.5 5.5 19 12 12.5 18.5"/></svg> 12h <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="12" x2="19" y2="12"/><polyline points="12.5 5.5 19 12 12.5 18.5"/></svg> 24h <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="12" x2="19" y2="12"/><polyline points="12.5 5.5 19 12 12.5 18.5"/></svg> 48h <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="12" x2="19" y2="12"/><polyline points="12.5 5.5 19 12 12.5 18.5"/></svg> 72h</b>，你的每一個決策都將決定病人的神經學預後 (CPC)。血壓、氧合、體溫、癲癇、心導管……每一步都依據 <b>2025 AHA Guidelines</b>。</p>
       <p style="margin-top:10px;">準備好了嗎，醫師？</p>
     </div>
-    <div class="learner-box">
-      <div class="learner-field">
-        <label for="inpName">學員姓名 / Name</label>
-        <input type="text" id="inpName" placeholder="（選填 optional）" autocomplete="off"
-          oninput="STATE.learner.name=this.value;" onchange="STATE.learner.name=this.value;">
+    <details class="howto">
+      <summary><svg class="ico" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 0 1 4.5 1.5c0 1.5-2 2-2 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> 玩法說明 / How to play <svg class="vit-chev" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></summary>
+      <div class="howto-body">
+        <p><b>怎麼開始：</b>按「開始挑戰」進入關卡選擇，從第一關開始，逐關解鎖。</p>
+        <p><b>怎麼玩：</b>每關是一個臨床情境，依題目做決策（選項、滑桿等）。作答後會有即時回饋與「為什麼?」證據說明。右側（手機在下方，可收合）的生命徵象面板會隨你的決策變化。</p>
+        <p><b>三種模式：</b><br>
+          • <b>主線闖關</b>：七關 72 小時情境，完成後看 CPC 預後、恢復曲線與成績單。<br>
+          • <b>隨機快速挑戰</b>：從題庫隨機抽題的限時快問快答，適合零碎時間複習。<br>
+          • <b>文獻庫</b>：本遊戲引用的 2025 AHA 等實證文獻與連結。</p>
+        <p><b>結束後：</b>結算頁可「錯題重練」只練答錯的題目，也可列印成績單。</p>
       </div>
-      <div class="learner-field">
-        <label for="inpUnit">單位 / 科別 Unit / Dept</label>
-        <input type="text" id="inpUnit" placeholder="（選填 optional）" autocomplete="off"
-          oninput="STATE.learner.unit=this.value;" onchange="STATE.learner.unit=this.value;">
-      </div>
-    </div>
+    </details>
     <div class="home-btns">
       <button class="btn" onclick="beginCampaign()">開始挑戰 <svg class="ico" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path fill="currentColor" d="M7.5 4.5v15L20 12 7.5 4.5z"/></svg></button>
       <button class="btn secondary" id="homeRapidBtn" onclick="startRapid()"><svg class="ico" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4.5 13.5h6L11 22l8.5-11.5h-6L13 2z"/></svg> 隨機快速挑戰</button>
@@ -420,7 +465,9 @@
       </div>
 
       <div class="card vitals">
-        <h4><svg class="ico" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 3v6.5a5 5 0 0 0 10 0V3"/><path d="M9.5 14.5V17a5 5 0 0 0 10 0v-3"/><circle cx="19.5" cy="11.5" r="2.5"/></svg> Patient Vitals</h4>
+        <div class="vitals-note">即時生理監視器:數值會隨你的決策即時變化,用來呈現病況與處置結果。作答看題目情境即可,此面板僅供參考,不含隱藏題目資訊。</div>
+        <details class="vitbox" id="vitalsBox" open>
+        <summary><h4><svg class="ico" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 3v6.5a5 5 0 0 0 10 0V3"/><path d="M9.5 14.5V17a5 5 0 0 0 10 0v-3"/><circle cx="19.5" cy="11.5" r="2.5"/></svg> Patient Vitals</h4><svg class="vit-chev" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></summary>
         <div class="ecg"><svg viewBox="0 0 300 54" preserveAspectRatio="none"><polyline id="ecgLine" fill="none" stroke="var(--accent)" stroke-width="1.6" points=""/></svg></div>
         <div class="vital" data-v="map">
           <div class="row"><span>MAP <small>mmHg</small></span><span class="val" id="v-map">—</span></div>
@@ -445,6 +492,7 @@
         <div style="font-size:11px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px;margin-top:4px;">
           RASS = 鎮靜程度評估 · MAP = 平均動脈壓
         </div>
+        </details>
       </div>
     </div>
   </section>
@@ -489,6 +537,21 @@
 
   <!-- ===== SCORE REPORT / 成績單 ===== -->
   <section id="screen-report" class="screen hidden">
+    <div class="name-panel">
+      <div class="name-note">想在成績單上顯示名字嗎？以下為<b>選填</b>，僅用於列印此頁，<b>不會儲存或上傳</b>，重新整理即清除。不填也能正常列印（顯示為「未具名」）。</div>
+      <div class="learner-box">
+        <div class="learner-field">
+          <label for="inpName">學員姓名 / Name</label>
+          <input type="text" id="inpName" placeholder="（選填 optional）" autocomplete="off"
+            oninput="STATE.learner.name=this.value;renderReport();" onchange="STATE.learner.name=this.value;renderReport();">
+        </div>
+        <div class="learner-field">
+          <label for="inpUnit">單位 / 科別 Unit / Dept</label>
+          <input type="text" id="inpUnit" placeholder="（選填 optional）" autocomplete="off"
+            oninput="STATE.learner.unit=this.value;renderReport();" onchange="STATE.learner.unit=this.value;renderReport();">
+        </div>
+      </div>
+    </div>
     <div class="report-doc" id="reportDoc"></div>
     <div class="actions">
       <button class="btn secondary" onclick="showFinal()"><svg class="ico" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="20" y1="12" x2="5" y2="12"/><polyline points="11.5 5.5 5 12 11.5 18.5"/></svg> 返回最終結果</button>
@@ -2809,6 +2872,16 @@ function reviewFinish(){
 
 // init
 updateHUD();
+
+// Vitals panel: collapse by default on narrow screens, expand on desktop
+(function(){
+  if(!window.matchMedia) return;            // graceful fallback: stays expanded
+  var mq = window.matchMedia('(max-width:860px)');
+  function applyVit(){ var d=document.getElementById('vitalsBox'); if(d) d.open = !mq.matches; }
+  applyVit();
+  if(mq.addEventListener) mq.addEventListener('change', applyVit);
+  else if(mq.addListener) mq.addListener(applyVit);
+})();
 </script>
 </body>
 </html>
