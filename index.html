@@ -1,0 +1,2814 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>72小時生存挑戰 — ACLS ROSC Post-Cardiac-Arrest Care</title>
+<style>
+  :root{
+    --bg:#0c1622;
+    --panel:#13202f;
+    --panel2:#1a2c40;
+    --line:#27405b;
+    --accent:#2dd4bf;
+    --accent2:#38bdf8;
+    --good:#34d399;
+    --warn:#fbbf24;
+    --bad:#f87171;
+    --txt:#e8f1f8;
+    --muted:#90a7bd;
+    --shadow:0 10px 30px rgba(0,0,0,.4);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:"Segoe UI","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+    background:radial-gradient(1200px 700px at 80% -10%,#16314a 0%,var(--bg) 55%);
+    color:var(--txt);
+    min-height:100vh;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:18px 16px 60px;}
+  header.topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:12px;padding:14px 18px;margin-bottom:18px;
+    background:linear-gradient(120deg,#0f2638,#16344b);
+    border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);
+  }
+  .brand{display:flex;align-items:center;gap:12px;}
+  .pulse{
+    width:40px;height:40px;border-radius:10px;flex:none;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:grid;place-items:center;font-size:22px;
+    box-shadow:0 0 18px rgba(45,212,191,.5);
+  }
+  .brand h1{font-size:18px;letter-spacing:.5px;}
+  .brand p{font-size:12px;color:var(--muted);}
+  .hud{display:flex;gap:10px;flex-wrap:wrap;}
+  .chip{
+    background:var(--panel2);border:1px solid var(--line);
+    border-radius:999px;padding:6px 14px;font-size:13px;display:flex;align-items:center;gap:6px;
+  }
+  .chip b{color:var(--accent);}
+  .badges-chip span{font-size:16px;}
+
+  .card{
+    background:var(--panel);border:1px solid var(--line);
+    border-radius:18px;padding:24px;box-shadow:var(--shadow);
+  }
+  .screen{animation:fade .4s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+
+  h2.title{font-size:24px;margin-bottom:6px;}
+  .sub{color:var(--muted);font-size:14px;margin-bottom:18px;}
+
+  /* Start screen */
+  .hero{
+    text-align:center;padding:40px 20px;
+    background:radial-gradient(700px 360px at 50% 0%,#1c3a55 0%,transparent 70%);
+  }
+  .hero .big{font-size:38px;font-weight:800;letter-spacing:1px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    -webkit-background-clip:text;background-clip:text;color:transparent;}
+  .hero .tag{font-size:16px;color:var(--muted);margin:10px 0 26px;}
+  .story-box{
+    max-width:640px;margin:0 auto 26px;text-align:left;
+    background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:18px 20px;
+    font-size:14.5px;color:#cfe1f0;
+  }
+
+  .btn{
+    cursor:pointer;border:none;border-radius:12px;padding:13px 26px;
+    font-size:15px;font-weight:700;color:#04222a;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    transition:transform .15s, box-shadow .15s;box-shadow:0 6px 18px rgba(45,212,191,.35);
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(45,212,191,.5);}
+  .btn.secondary{background:var(--panel2);color:var(--txt);border:1px solid var(--line);box-shadow:none;}
+  .btn.secondary:hover{border-color:var(--accent);}
+  .btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+
+  /* Level select */
+  .levels{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;}
+  .level{
+    background:var(--panel2);border:1px solid var(--line);border-radius:16px;
+    padding:18px;cursor:pointer;transition:transform .15s,border-color .15s;position:relative;overflow:hidden;
+  }
+  .level:hover{transform:translateY(-3px);border-color:var(--accent);}
+  .level.locked{opacity:.55;cursor:not-allowed;}
+  .level.locked:hover{transform:none;border-color:var(--line);}
+  .level .code{font-size:13px;color:var(--accent);font-weight:700;letter-spacing:1px;}
+  .level h3{font-size:17px;margin:6px 0;}
+  .level .desc{font-size:13px;color:var(--muted);min-height:38px;}
+  .level .foot{margin-top:12px;font-size:12px;display:flex;justify-content:space-between;align-items:center;}
+  .lock-icon{font-size:18px;}
+  .stamp{position:absolute;top:10px;right:12px;font-size:22px;}
+  .level .stars{color:var(--warn);letter-spacing:2px;}
+
+  /* Gameplay layout */
+  .play-grid{display:grid;grid-template-columns:1fr 300px;gap:18px;align-items:start;}
+  @media(max-width:860px){.play-grid{grid-template-columns:1fr;}}
+
+  .vitals{position:sticky;top:14px;}
+  .vitals h4{font-size:14px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+  .vital{margin-bottom:16px;}
+  .vital .row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;}
+  .vital .val{font-weight:700;}
+  .bar{height:9px;border-radius:6px;background:#0a141f;overflow:hidden;border:1px solid var(--line);}
+  .bar i{display:block;height:100%;border-radius:6px;transition:width .6s cubic-bezier(.2,.8,.2,1),background .4s;}
+  .ecg{height:54px;background:#06101a;border:1px solid var(--line);border-radius:10px;margin-bottom:14px;overflow:hidden;position:relative;}
+  .ecg svg{width:100%;height:100%;}
+  .stat-ok{color:var(--good);}
+  .stat-warn{color:var(--warn);}
+  .stat-bad{color:var(--bad);}
+
+  .scene{font-size:13px;color:var(--accent2);font-weight:700;letter-spacing:1px;margin-bottom:4px;}
+  .ptline{font-size:13px;color:var(--muted);margin-bottom:18px;}
+  .qbox{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:16px;}
+  .qbox .qnum{font-size:12px;color:var(--accent);font-weight:700;}
+  .qbox h3{font-size:18px;margin:6px 0 4px;}
+  .qbox .hint{font-size:13px;color:var(--muted);margin-bottom:14px;}
+
+  .opts{display:flex;flex-direction:column;gap:10px;}
+  .opt{
+    text-align:left;background:#0e1c2b;border:1px solid var(--line);border-radius:11px;
+    padding:13px 15px;cursor:pointer;font-size:14.5px;color:var(--txt);transition:.15s;
+    display:flex;gap:10px;align-items:flex-start;
+  }
+  .opt:hover{border-color:var(--accent2);background:#11243a;}
+  .opt.sel{border-color:var(--accent);}
+  .opt.correct{border-color:var(--good);background:rgba(52,211,153,.12);}
+  .opt.wrong{border-color:var(--bad);background:rgba(248,113,113,.12);}
+  .opt .k{font-weight:800;color:var(--accent2);flex:none;}
+
+  /* slider */
+  .slider-wrap{padding:6px 4px 0;}
+  .slider-val{font-size:34px;font-weight:800;text-align:center;margin-bottom:6px;}
+  .slider-val small{font-size:15px;color:var(--muted);font-weight:600;}
+  input[type=range]{width:100%;height:6px;border-radius:5px;background:var(--line);
+    -webkit-appearance:none;appearance:none;outline:none;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));cursor:pointer;box-shadow:0 0 12px rgba(45,212,191,.6);}
+  input[type=range]::-moz-range-thumb{width:24px;height:24px;border:none;border-radius:50%;
+    background:var(--accent);cursor:pointer;}
+  .scale{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px;}
+
+  /* feedback */
+  .feedback{border-radius:12px;padding:14px 16px;margin-top:14px;font-size:14px;animation:fade .3s;}
+  .feedback.ok{background:rgba(52,211,153,.12);border:1px solid var(--good);}
+  .feedback.warn{background:rgba(251,191,36,.12);border:1px solid var(--warn);}
+  .feedback.bad{background:rgba(248,113,113,.12);border:1px solid var(--bad);}
+  .evidence-btn{margin-top:10px;font-size:12.5px;color:var(--accent2);background:none;border:1px dashed var(--line);
+    border-radius:8px;padding:6px 12px;cursor:pointer;}
+  .evidence-btn:hover{border-color:var(--accent2);}
+
+  .actions{display:flex;gap:12px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap;}
+
+  /* timer event */
+  .timer-banner{
+    background:linear-gradient(120deg,#3a1320,#5a1b2c);border:1px solid var(--bad);
+    border-radius:12px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;
+    animation:flash 1s infinite alternate;
+  }
+  @keyframes flash{from{box-shadow:0 0 0 rgba(248,113,113,0);}to{box-shadow:0 0 22px rgba(248,113,113,.5);}}
+  .countdown{font-size:30px;font-weight:800;color:var(--bad);min-width:54px;text-align:center;font-variant-numeric:tabular-nums;}
+
+  /* modal */
+  .overlay{position:fixed;inset:0;background:rgba(4,10,18,.7);backdrop-filter:blur(4px);
+    display:none;place-items:center;z-index:50;padding:20px;}
+  .overlay.show{display:grid;}
+  .modal{max-width:560px;width:100%;background:var(--panel);border:1px solid var(--accent);
+    border-radius:18px;padding:24px;box-shadow:var(--shadow);animation:fade .3s;}
+  .modal h3{font-size:19px;margin-bottom:10px;color:var(--accent);}
+  .modal p{font-size:14.5px;color:#d6e6f2;margin-bottom:10px;}
+  .modal .cite{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px;margin-top:6px;}
+
+  /* level complete */
+  .scorebig{font-size:56px;font-weight:800;text-align:center;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .badge-earn{text-align:center;font-size:20px;margin:14px 0;}
+  .badge-earn .b{font-size:44px;display:block;margin-bottom:6px;animation:pop .5s;}
+  @keyframes pop{0%{transform:scale(0);}70%{transform:scale(1.2);}100%{transform:scale(1);}}
+  .review{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-top:16px;font-size:13.5px;}
+  .review h4{margin-bottom:8px;font-size:14px;}
+  .review li{margin-left:18px;margin-bottom:4px;color:var(--muted);}
+
+  /* final */
+  .cpc-card{text-align:center;padding:30px 20px;border-radius:18px;margin-bottom:18px;}
+  .cpc-1{background:radial-gradient(600px 300px at 50% 0,#14463a,transparent 70%);border:1px solid var(--good);}
+  .cpc-2{background:radial-gradient(600px 300px at 50% 0,#4a3c10,transparent 70%);border:1px solid var(--warn);}
+  .cpc-3{background:radial-gradient(600px 300px at 50% 0,#4a1414,transparent 70%);border:1px solid var(--bad);}
+  .cpc-card .label{font-size:14px;letter-spacing:2px;color:var(--muted);}
+  .cpc-card .grade{font-size:44px;font-weight:800;margin:6px 0;}
+  .letter{max-width:620px;margin:18px auto;background:var(--panel2);border:1px solid var(--line);
+    border-radius:14px;padding:22px;font-size:15px;line-height:1.8;color:#dcebf6;font-style:italic;}
+  .letter .sign{text-align:right;font-style:normal;color:var(--muted);margin-top:12px;}
+
+  footer{margin-top:30px;text-align:center;font-size:11.5px;color:var(--muted);line-height:1.7;}
+  .disclaimer{background:rgba(248,113,113,.08);border:1px solid var(--line);border-radius:10px;
+    padding:12px;margin-top:20px;font-size:12px;color:var(--muted);}
+  .hidden{display:none!important;}
+
+  /* home buttons row */
+  .home-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+
+  /* reference library */
+  .ref-list{display:flex;flex-direction:column;gap:14px;}
+  .ref-card{
+    background:var(--panel2);border:1px solid var(--line);border-radius:14px;
+    padding:16px 18px;transition:border-color .15s;
+  }
+  .ref-card:hover{border-color:var(--accent);}
+  .ref-card .rtag{font-size:12px;color:var(--accent);font-weight:700;letter-spacing:.5px;display:flex;align-items:center;gap:6px;}
+  .ref-card .rtitle{font-size:15.5px;font-weight:700;margin:6px 0 4px;}
+  .ref-card .rmeta{font-size:12.5px;color:var(--muted);line-height:1.6;}
+  .ref-card .rtake{font-size:13.5px;color:#cfe1f0;margin-top:8px;background:#0e1c2b;border:1px solid var(--line);border-radius:9px;padding:8px 12px;display:flex;gap:8px;align-items:flex-start;}
+  .ref-card a.doi{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-size:12.5px;color:var(--accent2);text-decoration:none;border:1px dashed var(--line);border-radius:8px;padding:5px 11px;}
+  .ref-card a.doi:hover{border-color:var(--accent2);}
+  .modal .ref-link{margin-top:12px;}
+  .modal .ref-link button{font-size:12.5px;color:var(--accent2);background:none;border:1px dashed var(--line);border-radius:8px;padding:6px 12px;cursor:pointer;}
+  .modal .ref-link button:hover{border-color:var(--accent2);}
+
+  /* rapid challenge */
+  .rapid-stat{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+  .rapid-stat .chip b{color:var(--accent);}
+  .rapid-result .scorebig{margin-bottom:8px;}
+  .rapid-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:16px 0;}
+  .rapid-grid .cell{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;text-align:center;}
+  .rapid-grid .cell .n{font-size:26px;font-weight:800;color:var(--accent);}
+  .rapid-grid .cell .l{font-size:12px;color:var(--muted);margin-top:2px;}
+  .progress-dots{display:flex;gap:6px;margin-bottom:16px;}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--line);}
+  .dot.active{background:var(--accent);}
+  .dot.done{background:var(--good);}
+
+  /* inline SVG icons */
+  .ico{width:1em;height:1em;vertical-align:-0.15em;display:inline-block;flex:none;}
+  .ico-ok{color:var(--good);}
+  .ico-warn{color:var(--warn);}
+  .ico-bad{color:var(--bad);}
+  .ico-bulb{color:var(--warn);}
+  .pulse{color:#04222a;}
+  .stamp .ico,.lock-icon .ico{vertical-align:-0.12em;}
+  .badge-earn .b .ico{width:1em;height:1em;}
+  .badges-chip .ico{color:var(--warn);}
+
+  /* learner identity (home) */
+  .learner-box{
+    max-width:640px;margin:0 auto 22px;display:grid;grid-template-columns:1fr 1fr;gap:14px;text-align:left;
+  }
+  @media(max-width:560px){.learner-box{grid-template-columns:1fr;}}
+  .learner-field label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:6px;letter-spacing:.3px;}
+  .learner-field input{
+    width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:11px;
+    padding:11px 14px;font-size:14.5px;color:var(--txt);outline:none;transition:border-color .15s;
+    font-family:inherit;
+  }
+  .learner-field input:focus{border-color:var(--accent);}
+  .learner-field input::placeholder{color:#5d758c;}
+
+  /* ===== score report / 成績單 ===== */
+  .report-doc{
+    background:var(--panel);border:1px solid var(--line);border-radius:16px;
+    padding:30px 34px;max-width:820px;margin:0 auto;
+  }
+  .report-head{display:flex;align-items:center;gap:16px;border-bottom:2px solid var(--line);padding-bottom:18px;margin-bottom:20px;}
+  .report-mark{
+    width:54px;height:54px;border-radius:12px;flex:none;display:grid;place-items:center;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04222a;
+  }
+  .report-mark .ico{width:30px;height:30px;}
+  .report-head h2{font-size:22px;letter-spacing:.5px;margin-bottom:4px;}
+  .report-head .rsub{font-size:12.5px;color:var(--muted);letter-spacing:.5px;}
+  .report-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px;}
+  @media(max-width:560px){.report-meta{grid-template-columns:1fr;}}
+  .report-meta .m{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:12px 14px;}
+  .report-meta .m .ml{font-size:11.5px;color:var(--muted);letter-spacing:.5px;margin-bottom:4px;}
+  .report-meta .m .mv{font-size:15.5px;font-weight:700;}
+  .report-table{width:100%;border-collapse:collapse;margin:8px 0 20px;font-size:13.5px;}
+  .report-table th,.report-table td{border:1px solid var(--line);padding:9px 12px;text-align:left;}
+  .report-table th{background:var(--panel2);color:var(--accent2);font-size:12.5px;letter-spacing:.5px;}
+  .report-table td.num{text-align:right;font-variant-numeric:tabular-nums;}
+  .report-table td.st-done{color:var(--good);}
+  .report-table td.st-undone{color:var(--muted);}
+  .report-table tr.tot td{font-weight:800;background:var(--panel2);}
+  .report-cpc{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    background:var(--panel2);border:1px solid var(--line);border-radius:13px;padding:16px 18px;margin-bottom:18px;
+  }
+  .report-cpc .cpc-big{font-size:30px;font-weight:800;}
+  .report-cpc .cpc-meta{font-size:13px;color:var(--muted);}
+  .report-section-title{font-size:14px;font-weight:700;margin:0 0 10px;display:flex;align-items:center;gap:8px;}
+  .report-badges{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px;}
+  .report-badges .rb{
+    display:inline-flex;align-items:center;gap:7px;background:var(--panel2);border:1px solid var(--line);
+    border-radius:999px;padding:7px 14px;font-size:13px;
+  }
+  .report-badges .rb .ico{color:var(--warn);}
+  .report-eval{
+    background:#0e1c2b;border:1px solid var(--line);border-radius:11px;padding:14px 16px;
+    font-size:14px;color:#cfe1f0;line-height:1.7;margin-bottom:20px;
+  }
+  .report-foot{border-top:1px solid var(--line);padding-top:14px;font-size:12px;color:var(--muted);
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+
+  /* ===== PRINT ===== */
+  @media print{
+    body{background:#fff!important;color:#111!important;}
+    .wrap{max-width:none;padding:0;margin:0;}
+    /* hide all app chrome and every non-report screen */
+    header.topbar, footer, .home-btns, .learner-box, .actions, .overlay,
+    #screen-start, #screen-levels, #screen-play, #screen-done,
+    #screen-final, #screen-refs, #screen-rapid, #screen-review, .disclaimer{
+      display:none!important;
+    }
+    /* show only report screen content */
+    #screen-report{display:block!important;border:none!important;box-shadow:none!important;
+      background:#fff!important;padding:0!important;margin:0!important;animation:none!important;}
+    #screen-report .actions{display:none!important;}
+    .report-doc{
+      background:#fff!important;color:#111!important;border:1px solid #999!important;
+      box-shadow:none!important;max-width:100%;border-radius:0;padding:18mm 16mm;margin:0;
+    }
+    .report-head{border-bottom:2px solid #333!important;}
+    .report-head h2{color:#111!important;}
+    .report-head .rsub, .report-meta .m .ml, .report-cpc .cpc-meta,
+    .report-foot, .report-table td.st-undone{color:#555!important;}
+    .report-mark{background:#e6f6f4!important;color:#0a6e62!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .report-meta .m, .report-cpc, .report-table th, .report-eval, .report-badges .rb,
+    .report-table tr.tot td{
+      background:#f3f6f9!important;color:#111!important;border:1px solid #bbb!important;
+      -webkit-print-color-adjust:exact;print-color-adjust:exact;
+    }
+    .report-meta .m .mv, .report-section-title, .report-table td, .report-cpc .cpc-big{color:#111!important;}
+    .report-table th{color:#0a4f6e!important;}
+    .report-table th,.report-table td{border:1px solid #999!important;}
+    .report-eval{color:#222!important;}
+    .report-table td.st-done{color:#0a7a45!important;}
+    .report-badges .rb .ico{color:#b8860b!important;}
+    @page{size:A4;margin:12mm;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="pulse"><svg class="ico" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path fill="currentColor" d="M12 20.8C8.4 18.3 3 14.3 3 9.3 3 6.4 5.2 4.2 8 4.2c1.6 0 3.1.8 4 2 .9-1.2 2.4-2 4-2 2.8 0 5 2.2 5 5.1 0 5-5.4 9-9 11.5z"/></svg></div>
+      <div>
+        <h1>72小時生存挑戰</h1>
+        <p>ACLS ROSC · Post-Cardiac-Arrest Critical Care</p>
+      </div>
+    </div>
+    <div class="hud">
+      <div class="chip">總分 <b id="hudScore">0</b></div>
+      <div class="chip badges-chip">徽章 <span id="hudBadges">—</span></div>
+    </div>
+  </header>
+
+  <!-- ===== START SCREEN ===== -->
+  <section id="screen-start" class="screen card hero">
+    <div class="big">72小時生存挑戰</div>
+    <div class="tag">ROSC 後重症照護模擬 · Post-Cardiac-Arrest Care Simulator</div>
+    <div class="story-box">
+      <p>你是急診/加護病房 (ED/ICU) 主治醫師。一位心臟驟停 (cardiac arrest) 病人在 CPR 後恢復自主循環 (<b>ROSC</b> — Return of Spontaneous Circulation)。</p>
+      <p style="margin-top:10px;">真正的挑戰才剛開始：接下來 <b>0h <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="12" x2="19" y2="12"/><polyline points="12.5 5.5 19 12 12.5 18.5"/></svg> 6h <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="12" x2="19" y2="12"/><polyline points="12.5 5.5 19 12 12.5 18.5"/></svg> 12h <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="12" x2="19" y2="12"/><polyline points="12.5 5.5 19 12 12.5 18.5"/></svg> 24h <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="12" x2="19" y2="12"/><polyline points="12.5 5.5 19 12 12.5 18.5"/></svg> 48h <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="12" x2="19" y2="12"/><polyline points="12.5 5.5 19 12 12.5 18.5"/></svg> 72h</b>，你的每一個決策都將決定病人的神經學預後 (CPC)。血壓、氧合、體溫、癲癇、心導管……每一步都依據 <b>2025 AHA Guidelines</b>。</p>
+      <p style="margin-top:10px;">準備好了嗎，醫師？</p>
+    </div>
+    <div class="learner-box">
+      <div class="learner-field">
+        <label for="inpName">學員姓名 / Name</label>
+        <input type="text" id="inpName" placeholder="（選填 optional）" autocomplete="off"
+          oninput="STATE.learner.name=this.value;" onchange="STATE.learner.name=this.value;">
+      </div>
+      <div class="learner-field">
+        <label for="inpUnit">單位 / 科別 Unit / Dept</label>
+        <input type="text" id="inpUnit" placeholder="（選填 optional）" autocomplete="off"
+          oninput="STATE.learner.unit=this.value;" onchange="STATE.learner.unit=this.value;">
+      </div>
+    </div>
+    <div class="home-btns">
+      <button class="btn" onclick="beginCampaign()">開始挑戰 <svg class="ico" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path fill="currentColor" d="M7.5 4.5v15L20 12 7.5 4.5z"/></svg></button>
+      <button class="btn secondary" id="homeRapidBtn" onclick="startRapid()"><svg class="ico" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4.5 13.5h6L11 22l8.5-11.5h-6L13 2z"/></svg> 隨機快速挑戰</button>
+      <button class="btn secondary" id="homeRefBtn" onclick="go('refs')"><svg class="ico" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg> 文獻庫 References</button>
+    </div>
+    <div class="disclaimer">教育模擬遊戲，非真實醫療建議。Educational simulation only — not real medical advice. 臨床決策請依據完整指引與個別病人狀況。</div>
+  </section>
+
+  <!-- ===== LEVEL SELECT ===== -->
+  <section id="screen-levels" class="screen card hidden">
+    <h2 class="title">關卡選擇 Level Select</h2>
+    <p class="sub">完成關卡以解鎖下一關。Levels unlock sequentially.</p>
+    <div class="levels" id="levelGrid"></div>
+    <div class="actions">
+      <button class="btn secondary" onclick="go('start')"><svg class="ico" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="20" y1="12" x2="5" y2="12"/><polyline points="11.5 5.5 5 12 11.5 18.5"/></svg> 返回</button>
+      <button class="btn" id="finishBtn" onclick="showFinal()">查看 72h 最終結果 <svg class="ico" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="12" x2="19" y2="12"/><polyline points="12.5 5.5 19 12 12.5 18.5"/></svg></button>
+    </div>
+  </section>
+
+  <!-- ===== GAMEPLAY ===== -->
+  <section id="screen-play" class="screen hidden">
+    <div class="play-grid">
+      <div class="card" style="padding:22px 24px;">
+        <div class="progress-dots" id="progDots"></div>
+        <div class="scene" id="sceneLabel"></div>
+        <div class="ptline" id="ptLine"></div>
+        <div id="timerSlot"></div>
+        <div id="qContainer"></div>
+        <div class="actions" id="playActions"></div>
+      </div>
+
+      <div class="card vitals">
+        <h4><svg class="ico" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 3v6.5a5 5 0 0 0 10 0V3"/><path d="M9.5 14.5V17a5 5 0 0 0 10 0v-3"/><circle cx="19.5" cy="11.5" r="2.5"/></svg> Patient Vitals</h4>
+        <div class="ecg"><svg viewBox="0 0 300 54" preserveAspectRatio="none"><polyline id="ecgLine" fill="none" stroke="var(--accent)" stroke-width="1.6" points=""/></svg></div>
+        <div class="vital" data-v="map">
+          <div class="row"><span>MAP <small>mmHg</small></span><span class="val" id="v-map">—</span></div>
+          <div class="bar"><i id="b-map"></i></div>
+        </div>
+        <div class="vital" data-v="hr">
+          <div class="row"><span>HR <small>bpm</small></span><span class="val" id="v-hr">—</span></div>
+          <div class="bar"><i id="b-hr"></i></div>
+        </div>
+        <div class="vital" data-v="temp">
+          <div class="row"><span>體溫 Temp <small>°C</small></span><span class="val" id="v-temp">—</span></div>
+          <div class="bar"><i id="b-temp"></i></div>
+        </div>
+        <div class="vital" data-v="spo2">
+          <div class="row"><span>SpO₂ <small>%</small></span><span class="val" id="v-spo2">—</span></div>
+          <div class="bar"><i id="b-spo2"></i></div>
+        </div>
+        <div class="vital" data-v="rass">
+          <div class="row"><span>RASS</span><span class="val" id="v-rass">—</span></div>
+          <div class="bar"><i id="b-rass"></i></div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px;margin-top:4px;">
+          RASS = 鎮靜程度評估 · MAP = 平均動脈壓
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== LEVEL COMPLETE ===== -->
+  <section id="screen-done" class="screen card hidden">
+    <h2 class="title" id="doneTitle">關卡完成</h2>
+    <div class="scorebig"><span id="doneScore">0</span> <small style="font-size:20px;color:var(--muted);">/ <span id="doneMax">100</span></small></div>
+    <div class="badge-earn" id="doneBadge"></div>
+    <div class="review" id="doneReview"></div>
+    <div class="actions">
+      <button class="btn secondary" onclick="go('levels')">關卡選擇</button>
+      <button class="btn" id="nextLevelBtn" onclick="nextFromDone()">繼續 <svg class="ico" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="12" x2="19" y2="12"/><polyline points="12.5 5.5 19 12 12.5 18.5"/></svg></button>
+    </div>
+  </section>
+
+  <!-- ===== FINAL ===== -->
+  <section id="screen-final" class="screen card hidden">
+    <h2 class="title">72小時最終結果 · Final Outcome</h2>
+    <p class="sub">綜合所有決策計算神經學預後 (Cerebral Performance Category)。</p>
+    <div id="cpcSlot"></div>
+    <div class="letter" id="letterSlot"></div>
+    <div class="review" id="finalReview"></div>
+    <div class="actions">
+      <button class="btn secondary" onclick="restart()">重新挑戰 <svg class="ico" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.4L21 8.2"/><polyline points="21 3 21 8.2 15.8 8.2"/></svg></button>
+      <button class="btn secondary" id="reviewMistakesBtn" onclick="startReview()">錯題重練 / Review Mistakes <svg class="ico" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v.5"/><line x1="9" y1="10.5" x2="15" y2="10.5"/><line x1="9" y1="14.5" x2="15" y2="14.5"/></svg></button>
+      <button class="btn secondary" onclick="go('levels')">回到關卡</button>
+      <button class="btn" onclick="go('report')">產生成績單 / Score Report <svg class="ico" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v.5"/><line x1="9" y1="10.5" x2="15" y2="10.5"/><line x1="9" y1="14.5" x2="15" y2="14.5"/></svg></button>
+    </div>
+  </section>
+
+  <!-- ===== 錯題複習 / MISTAKE REVIEW ===== -->
+  <section id="screen-review" class="screen hidden">
+    <div class="card" style="padding:22px 24px;">
+      <h2 class="title" id="reviewTitle">錯題重練 Mistake Review</h2>
+      <p class="sub" id="reviewSub">逐題重新作答先前答錯或未滿分的決策。此模式僅供練習，不影響主線分數與徽章。</p>
+      <div class="rapid-stat" id="reviewStat"></div>
+      <div id="reviewContainer"></div>
+      <div class="actions" id="reviewActions"></div>
+    </div>
+  </section>
+
+  <!-- ===== SCORE REPORT / 成績單 ===== -->
+  <section id="screen-report" class="screen hidden">
+    <div class="report-doc" id="reportDoc"></div>
+    <div class="actions">
+      <button class="btn secondary" onclick="showFinal()"><svg class="ico" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="20" y1="12" x2="5" y2="12"/><polyline points="11.5 5.5 5 12 11.5 18.5"/></svg> 返回最終結果</button>
+      <button class="btn" onclick="window.print()">列印 / 下載 PDF <svg class="ico" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+    </div>
+  </section>
+
+  <!-- ===== REFERENCE LIBRARY ===== -->
+  <section id="screen-refs" class="screen card hidden">
+    <h2 class="title">文獻庫 References</h2>
+    <p class="sub">本遊戲臨床決策所依據的真實文獻。點擊 DOI 連結可於新分頁開啟原文。</p>
+    <div class="ref-list" id="refList"></div>
+    <div class="actions">
+      <button class="btn secondary" onclick="go('start')"><svg class="ico" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="20" y1="12" x2="5" y2="12"/><polyline points="11.5 5.5 5 12 11.5 18.5"/></svg> 返回首頁</button>
+    </div>
+  </section>
+
+  <!-- ===== RAPID RANDOM CHALLENGE ===== -->
+  <section id="screen-rapid" class="screen hidden">
+    <div class="card" style="padding:22px 24px;">
+      <h2 class="title" id="rapidTitle">隨機快速挑戰 Rapid Challenge</h2>
+      <p class="sub" id="rapidSub">從所有關卡題庫隨機抽題 — 限時作答，分秒必爭。</p>
+      <div class="rapid-stat" id="rapidStat"></div>
+      <div id="rapidTimerSlot"></div>
+      <div id="rapidContainer"></div>
+      <div class="actions" id="rapidActions"></div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="disclaimer" style="text-align:left;">
+      <b>參考文獻 References:</b><br>
+      • 2025 AHA Guidelines for CPR and ECC — Part 11: Post-Cardiac Arrest Care, <i>Circulation</i> 2025. <a href="https://doi.org/10.1161/CIR.0000000000001375" target="_blank" rel="noopener" style="color:var(--accent2);">doi.org/10.1161/CIR.0000000000001375</a><br>
+      • TTM2 Trial — Targeted hypothermia (33°C) vs normothermia (≤37.5°C): no significant difference in mortality/neurologic outcome (<i>NEJM</i> 2021). <a href="https://doi.org/10.1056/NEJMoa2100591" target="_blank" rel="noopener" style="color:var(--accent2);">doi.org/10.1056/NEJMoa2100591</a><br>
+      • BOX Trial — Blood pressure target (MAP) in comatose post-arrest patients (<i>NEJM</i> 2022). <a href="https://doi.org/10.1056/NEJMoa2208687" target="_blank" rel="noopener" style="color:var(--accent2);">doi.org/10.1056/NEJMoa2208687</a><br><br>
+      完整文獻請見 <a href="javascript:void(0)" onclick="go('refs')" style="color:var(--accent);">文獻庫 References</a>。<br><br>
+      本遊戲為教育模擬用途，不可取代臨床判斷或正式指引。Educational simulation only — not real medical advice.
+    </div>
+  </footer>
+</div>
+
+<!-- evidence modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h3 id="modalTitle"><svg class="ico ico-bulb" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5a6.5 6.5 0 0 0-4.2 11.5c.9.8 1.5 1.8 1.7 3h5c.2-1.2.8-2.2 1.7-3A6.5 6.5 0 0 0 12 2.5z"/><line x1="9.5" y1="19.5" x2="14.5" y2="19.5"/><line x1="10.5" y1="22" x2="13.5" y2="22"/></svg> 證據 Evidence</h3>
+    <p id="modalBody"></p>
+    <div class="cite" id="modalCite"></div>
+    <div class="ref-link"><button onclick="closeModal();go('refs')">查看文獻庫 / References
+      <svg class="ico" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg></button></div>
+    <div style="text-align:right;margin-top:14px;">
+      <button class="btn" onclick="closeModal()">了解 <svg class="ico" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 12.5 9.5 18 20 6"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   SVG ICON SET  (inline icons — no emoji anywhere)
+============================================================ */
+const ICONS = {
+  'check':'<polyline points="4 12.5 9.5 18 20 6"/>',
+  'cross':'<line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/>',
+  'warn':'<path d="M12 3.2 2.8 19.2a1 1 0 0 0 .9 1.5h16.6a1 1 0 0 0 .9-1.5L12 3.2z"/><line x1="12" y1="9.5" x2="12" y2="14"/><line x1="12" y1="17.2" x2="12.01" y2="17.2"/>',
+  'bulb':'<path d="M12 2.5a6.5 6.5 0 0 0-4.2 11.5c.9.8 1.5 1.8 1.7 3h5c.2-1.2.8-2.2 1.7-3A6.5 6.5 0 0 0 12 2.5z"/><line x1="9.5" y1="19.5" x2="14.5" y2="19.5"/><line x1="10.5" y1="22" x2="13.5" y2="22"/>',
+  'clipboard':'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v.5"/><line x1="9" y1="10.5" x2="15" y2="10.5"/><line x1="9" y1="14.5" x2="15" y2="14.5"/>',
+  'book':'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/>',
+  'stethoscope':'<path d="M4.5 3v6.5a5 5 0 0 0 10 0V3"/><path d="M9.5 14.5V17a5 5 0 0 0 10 0v-3"/><circle cx="19.5" cy="11.5" r="2.5"/>',
+  'lock':'<rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/><line x1="12" y1="14.5" x2="12" y2="16.5"/>',
+  'refresh':'<path d="M21 12a9 9 0 1 1-2.6-6.4L21 8.2"/><polyline points="21 3 21 8.2 15.8 8.2"/>',
+  'arrow-right':'<line x1="4" y1="12" x2="19" y2="12"/><polyline points="12.5 5.5 19 12 12.5 18.5"/>',
+  'arrow-left':'<line x1="20" y1="12" x2="5" y2="12"/><polyline points="11.5 5.5 5 12 11.5 18.5"/>',
+  'play':'<path fill="currentColor" d="M7.5 4.5v15L20 12 7.5 4.5z"/>',
+  'star-filled':'<path fill="currentColor" d="M12 2.8l2.85 5.9 6.45.9-4.7 4.5 1.15 6.4L12 17.45 6.25 20.5 7.4 14.1 2.7 9.6l6.45-.9L12 2.8z"/>',
+  'star-outline':'<path d="M12 2.8l2.85 5.9 6.45.9-4.7 4.5 1.15 6.4L12 17.45 6.25 20.5 7.4 14.1 2.7 9.6l6.45-.9L12 2.8z"/>',
+  'heart':'<path fill="currentColor" d="M12 20.8C8.4 18.3 3 14.3 3 9.3 3 6.4 5.2 4.2 8 4.2c1.6 0 3.1.8 4 2 .9-1.2 2.4-2 4-2 2.8 0 5 2.2 5 5.1 0 5-5.4 9-9 11.5z"/>',
+  'trophy':'<path d="M7 4h10v6a5 5 0 0 1-10 0V4z"/><path d="M7 5.5H4.5a3 3 0 0 0 3 4.7"/><path d="M17 5.5h2.5a3 3 0 0 1-3 4.7"/><line x1="12" y1="15" x2="12" y2="21"/><line x1="8" y1="21" x2="16" y2="21"/>',
+  'thermometer':'<path d="M14 14.5V4.5a2 2 0 0 0-4 0v10a4 4 0 1 0 4 0z"/><circle cx="12" cy="18" r="1" fill="currentColor"/>',
+  'bolt':'<path d="M13 2 4.5 13.5h6L11 22l8.5-11.5h-6L13 2z"/>',
+  'target':'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/>',
+  'medal':'<circle cx="12" cy="15.5" r="5.5"/><path d="M9.2 10.8 5.5 2.5h4.2L12 7.5l2.3-5h4.2l-3.7 8.3"/>',
+  'activity':'<polyline points="2 12 6 12 9 4 12 19 15 8 17 14 22 14"/>',
+  'search':'<circle cx="10.5" cy="10.5" r="6.5"/><line x1="15.2" y1="15.2" x2="21" y2="21"/>',
+  'lungs':'<path d="M12 3v8"/><path d="M9.5 8.5C9.5 6 7.5 5 6 6.2 4.4 7.5 4 11 4 14a3 3 0 0 0 3 3c1.7 0 2.6-1.2 2.6-3.2 0-2.5-.1-3.8-.1-5.3z"/><path d="M14.5 8.5C14.5 6 16.5 5 18 6.2c1.6 1.3 2 4.8 2 7.8a3 3 0 0 1-3 3c-1.7 0-2.6-1.2-2.6-3.2 0-2.5.1-3.8.1-5.3z"/>',
+  'shield-heart':'<path d="M12 2.5 5 5.2v5.3c0 4.4 3 8.1 7 9.3 4-1.2 7-4.9 7-9.3V5.2L12 2.5z"/><path fill="currentColor" stroke="none" d="M12 15.6c-1.8-1.3-3.4-2.6-3.4-4.2 0-1 .8-1.7 1.7-1.7.6 0 1.2.3 1.7.9.5-.6 1.1-.9 1.7-.9.9 0 1.7.7 1.7 1.7 0 1.6-1.6 2.9-3.4 4.2z"/>',
+};
+function icon(name, cls){
+  return '<svg class="ico'+(cls?' '+cls:'')+'" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(ICONS[name]||'')+'</svg>';
+}
+/* convert [[ok]] / [[warn]] / [[bad]] tokens in feedback strings to SVG */
+function deico(s){
+  return String(s)
+    .replace(/\[\[ok\]\]/g, icon('check','ico-ok')+' ')
+    .replace(/\[\[warn\]\]/g, icon('warn','ico-warn')+' ')
+    .replace(/\[\[bad\]\]/g, icon('cross','ico-bad')+' ');
+}
+
+/* ============================================================
+   GAME STATE  (in-memory only, no localStorage)
+============================================================ */
+const STATE = {
+  learner: { name:'', unit:'' },   // 學員姓名 / 單位 (in-memory only)
+  totalScore: 0,
+  badges: [],            // {icon,name}
+  unlocked: { 'L0-1':true, 'L1-1':true, 'L1-2':false, 'L2-1':false, 'L2-2':false, 'L2-3':false, 'L3-1':false },
+  completed: {},         // code -> {score,max}
+  mistakes: [],          // strings for review
+  wrongLog: [],          // serializable wrong/under-credit questions for 錯題重練 (in-memory only)
+  vitals: { map:55, hr:120, temp:37.0, spo2:90, rass:-1 },
+  vitalsLog: [],         // in-memory vital-signs time series: {t,map,hr,temp,spo2}
+  currentLevel: null,
+  stepIndex: 0,
+  levelScore: 0,
+  levelMax: 0,
+  levelMistakes: [],
+  caseScoreAtStart: 0,
+};
+
+/* ============================================================
+   LEVEL DEFINITIONS
+   Each step: {type:'slider'|'mc', ...}
+============================================================ */
+const LEVELS = {
+  'L0-1': {
+    code:'L0-1', title:'心律辨識挑戰 Rhythm Recognition',
+    desc:'基礎訓練：在時間壓力下辨識 5 種心律並決定可電擊 / 不可電擊與第一步處置。',
+    patient:'急救情境：監視器陸續顯示不同心律，請快速辨識並決定處置。每條心律限時 15 秒。',
+    badge:{icon:'activity',name:'心律辨識專家'},
+    next:'L1-1',
+    mode:'rhythm',
+    maxScore:100,
+    initVitals:{map:60,hr:120,temp:36.8,spo2:92,rass:-3},
+    strips:[
+      {
+        wave:'vf', monitor:'監視器：節律不規則、雜亂無章',
+        idQ:'這是什麼心律？',
+        idOpts:[
+          {t:'心室顫動 VF (Ventricular Fibrillation)',correct:true},
+          {t:'心房顫動 AF (Atrial Fibrillation)',correct:false},
+          {t:'竇性心律 Sinus rhythm',correct:false},
+          {t:'心搏停止 Asystole',correct:false},
+        ],
+        actQ:'最適當的立即處置？',
+        actOpts:[
+          {t:'可電擊 Shockable -> 立即去顫 (Defibrillation) + 恢復 CPR',correct:true},
+          {t:'不可電擊 -> 高品質 CPR + Epinephrine',correct:false},
+          {t:'有脈搏 -> 進入 ROSC 後照護',correct:false},
+        ],
+        fbOk:'[[ok]]正確！VF 為可電擊節律，須立即去顫並恢復高品質 CPR。',
+        fbBad:'[[bad]]VF 屬可電擊節律 (shockable)，應立即去顫 — 任何延誤都降低存活與神經預後。',
+        evidence:{title:'心室顫動 VF — 可電擊節律',
+          body:'VF 呈現雜亂、無組織的纖維顫動基線，無有效心輸出。屬可電擊節律 (shockable)，依 2025 AHA ACLS 演算法須立即去顫，並在電擊後立即恢復高品質 CPR。腎上腺素於首次或第二次電擊後再給予。',
+          cite:'2025 AHA Guidelines · ACLS Cardiac Arrest Algorithm (Shockable)'},
+      },
+      {
+        wave:'pvt', monitor:'監視器：寬大、規則、快速的單型複合波，病人無脈搏',
+        idQ:'這是什麼心律？',
+        idOpts:[
+          {t:'無脈性心室頻脈 pVT (Pulseless VT)',correct:true},
+          {t:'竇性心搏過速 Sinus tachycardia',correct:false},
+          {t:'心搏停止 Asystole',correct:false},
+          {t:'無脈性電氣活動 PEA',correct:false},
+        ],
+        actQ:'最適當的立即處置？',
+        actOpts:[
+          {t:'可電擊 Shockable -> 立即去顫 (Defibrillation) + 恢復 CPR',correct:true},
+          {t:'不可電擊 -> 高品質 CPR + Epinephrine',correct:false},
+          {t:'觀察並重複量測血壓',correct:false},
+        ],
+        fbOk:'[[ok]]正確！無脈性 VT 與 VF 同屬可電擊節律，立即去顫。',
+        fbBad:'[[bad]]無脈性 VT 屬可電擊節律 (shockable)，須立即去顫，勿延誤。',
+        evidence:{title:'無脈性心室頻脈 pVT — 可電擊節律',
+          body:'pVT 呈現寬大、規則、快速的單型 (monomorphic) 複合波，但病人無脈搏。與 VF 同屬可電擊節律，依 2025 AHA ACLS 須立即去顫並恢復 CPR；不可因外觀「規則」而誤判為灌流節律。',
+          cite:'2025 AHA Guidelines · ACLS Cardiac Arrest Algorithm (Shockable)'},
+      },
+      {
+        wave:'asystole', monitor:'監視器：近乎平直的等電位線',
+        idQ:'這是什麼心律？',
+        idOpts:[
+          {t:'心搏停止 Asystole',correct:true},
+          {t:'心室顫動 VF',correct:false},
+          {t:'無脈性心室頻脈 pVT',correct:false},
+          {t:'竇性心律 Sinus rhythm',correct:false},
+        ],
+        actQ:'最適當的立即處置？',
+        actOpts:[
+          {t:'不可電擊 -> 高品質 CPR + Epinephrine（並確認導線連接、排除假性心搏停止）',correct:true},
+          {t:'可電擊 -> 立即去顫',correct:false},
+          {t:'有脈搏 -> ROSC 後照護',correct:false},
+        ],
+        fbOk:'[[ok]]正確！Asystole 不可電擊，給予高品質 CPR + Epinephrine，並確認導線、排除假性 asystole。',
+        fbBad:'[[bad]]Asystole 不可電擊！電擊無益，應立即 CPR + Epinephrine 並確認導線連接、增益與導程。',
+        evidence:{title:'心搏停止 Asystole — 不可電擊節律',
+          body:'Asystole 呈現平直 / 近乎平直的線，屬不可電擊節律 (non-shockable)。處置為高品質 CPR 並「盡早」給予 Epinephrine。務必確認導線連接、增益與切換導程以排除「假性心搏停止 (pseudo-asystole)」— 細顫 VF 可能被誤判為平線。',
+          cite:'2025 AHA Guidelines · ACLS (Non-shockable) · Confirm leads'},
+      },
+      {
+        wave:'pea', monitor:'監視器：有組織的電氣活動，但觸診/脈搏檢查無脈搏',
+        idQ:'這是什麼心律？',
+        idOpts:[
+          {t:'無脈性電氣活動 PEA (Pulseless Electrical Activity)',correct:true},
+          {t:'竇性心律 Sinus rhythm (有脈搏)',correct:false},
+          {t:'心室顫動 VF',correct:false},
+          {t:'心搏停止 Asystole',correct:false},
+        ],
+        actQ:'最適當的立即處置？',
+        actOpts:[
+          {t:'不可電擊 -> CPR + Epinephrine + 排查 H’s & T’s 可逆原因',correct:true},
+          {t:'可電擊 -> 立即去顫',correct:false},
+          {t:'有脈搏 -> ROSC 後照護',correct:false},
+        ],
+        fbOk:'[[ok]]正確！PEA 有電氣活動卻無脈搏，不可電擊；CPR + Epinephrine 並積極排查 H’s & T’s。',
+        fbBad:'[[bad]]PEA 雖外觀「有波形」但無脈搏 — 不可電擊。應 CPR + Epinephrine 並排查可逆原因。',
+        evidence:{title:'無脈性電氣活動 PEA — 不可電擊節律',
+          body:'PEA 在監視器上呈現有組織、看似正常的電氣活動，但臨床上「無脈搏」。屬不可電擊節律，處置為高品質 CPR、盡早給予 Epinephrine，並系統性排查 H’s & T’s 可逆原因（如缺氧、低血容、高血鉀、張力性氣胸、心包填塞、肺栓塞等）。',
+          cite:'2025 AHA Guidelines · ACLS (Non-shockable) · H’s & T’s'},
+      },
+      {
+        wave:'sinus', monitor:'監視器：規則 P-QRS-T，可觸得脈搏',
+        idQ:'這是什麼心律？',
+        idOpts:[
+          {t:'竇性心律 Sinus rhythm (有脈搏 / ROSC)',correct:true},
+          {t:'心室顫動 VF',correct:false},
+          {t:'無脈性電氣活動 PEA',correct:false},
+          {t:'心搏停止 Asystole',correct:false},
+        ],
+        actQ:'最適當的立即處置？',
+        actOpts:[
+          {t:'非心跳停止 -> 評估循環、進入 ROSC 後照護',correct:true},
+          {t:'可電擊 -> 立即去顫',correct:false},
+          {t:'不可電擊 -> CPR + Epinephrine',correct:false},
+        ],
+        fbOk:'[[ok]]正確！正常 P-QRS-T 且有脈搏 — 非心跳停止，評估循環並進入 ROSC 後照護。',
+        fbBad:'[[bad]]這是有脈搏的竇性心律，對有灌流的病人去顫或 CPR 都會造成傷害。應評估循環、進入 ROSC 後照護。',
+        evidence:{title:'竇性心律 Sinus rhythm — 有脈搏 / ROSC',
+          body:'正常的 P-QRS-T 序列且可觸得脈搏代表有灌流節律。此時不可電擊、不可施行胸外按壓；應確認 ROSC、評估血壓與氧合，並啟動 post-cardiac-arrest care（血壓、氧合、體溫、冠脈評估等）。',
+          cite:'2025 AHA Guidelines · Post-Cardiac Arrest Care'},
+      },
+    ],
+  },
+
+  'L1-1': {
+    code:'L1-1', title:'首次 ROSC — 基礎穩定',
+    desc:'55歲男性 VF cardiac arrest，ROSC 於第2輪 CPR。建立 post-ROSC 照護基礎。',
+    patient:'病人：55歲男性，VF (心室顫動) cardiac arrest，第2輪 CPR 後 ROSC。目前昏迷、插管中。',
+    badge:{icon:'trophy',name:'ROSC後穩定專家'},
+    next:'L1-2',
+    initVitals:{map:55,hr:118,temp:37.2,spo2:90,rass:-3},
+    steps:[
+      {
+        type:'slider', pts:20, scene:'0h · 設定血壓目標', label:'Task 1 — 設定 MAP 目標',
+        hint:'拖動滑桿設定平均動脈壓 (MAP) 目標值。', unit:'mmHg', min:60, max:100, init:65, step:1,
+        vital:'map',
+        grade:(v)=> v>=80 ? 'ok':'warn',
+        applyVital:(v)=>{ STATE.vitals.map = v>=80?82:v>=70?72:62; },
+        fb:{
+          ok:'[[ok]]優秀！研究顯示 MAP ≥ 80 mmHg 可改善神經預後 (2025 AHA)。',
+          warn:'[[warn]]偏低，建議 MAP ≥ 80 mmHg 以維持腦部灌流。',
+        },
+        evidence:{title:'為什麼 MAP ≥ 80 mmHg？',
+          body:'ROSC 後腦部自我調節 (autoregulation) 受損，較高的 MAP 有助維持腦灌流壓。BOX trial 探討 MAP 63 vs 77 mmHg；2025 AHA 建議避免低血壓，目標 MAP ≥ 80 mmHg 以改善神經學預後。',
+          cite:'2025 AHA Guidelines Part 11 · BOX Trial (NEJM 2022)'},
+      },
+      {
+        type:'mc', pts:20, scene:'0h · 升壓藥選擇', label:'Task 2 — 選擇升壓藥 (vasopressor)',
+        hint:'MAP 仍偏低，需要升壓藥支持。', vital:'map',
+        opts:[
+          {k:'A',t:'Norepinephrine 正腎上腺素',correct:true,
+            fb:'[[ok]]正確！Norepinephrine 為 post-ROSC 低血壓首選升壓藥。',applyVital:()=>{STATE.vitals.map=84;}},
+          {k:'B',t:'Dopamine 多巴胺',correct:false,
+            fb:'[[warn]]Dopamine 增加心律不整 (arrhythmia) 風險，非首選。'},
+          {k:'C',t:'Epinephrine 腎上腺素',correct:false,
+            fb:'[[warn]]Epinephrine 保留用於心跳停止 (cardiac arrest)，非 ROSC 後首選升壓藥。'},
+        ],
+        evidence:{title:'為什麼選 Norepinephrine？',
+          body:'Norepinephrine 以 α 作用為主升高血壓且對心率影響小，相較 Dopamine 心律不整風險較低。2025 AHA 建議以 Norepinephrine 作為 post-ROSC 低血壓首選升壓藥。',
+          cite:'2025 AHA Guidelines Part 11 · Post-Cardiac Arrest Care'},
+      },
+      {
+        type:'slider', pts:20, scene:'0h · 氧合目標', label:'Task 3 — 設定 SpO₂ 目標',
+        hint:'避免低氧 (hypoxia) 與高氧 (hyperoxia)。', unit:'%', min:85, max:100, init:100, step:1,
+        vital:'spo2',
+        grade:(v)=> (v>=92 && v<=98)?'ok': v>98?'warn':'bad',
+        applyVital:(v)=>{ STATE.vitals.spo2 = (v>=92&&v<=98)?96 : v>98?99:89; },
+        fb:{
+          ok:'[[ok]]理想！SpO₂ 92–98% 兼顧足夠氧合並避免高氧傷害。',
+          warn:'[[warn]]高氧 (hyperoxia) 增加氧化壓力 (oxidative stress) 與再灌流傷害。',
+          bad:'[[bad]]低氧 (hypoxia) 加重腦部缺氧損傷，須提高目標。',
+        },
+        evidence:{title:'為什麼 SpO₂ 92–98%？',
+          body:'ROSC 後高氧會增加活性氧 (ROS) 與再灌流傷害，低氧則加重腦缺氧。2025 AHA 建議滴定 FiO₂ 使 SpO₂ 維持 92–98%，避免 SpO₂ 100% 對應的潛在高氧。',
+          cite:'2025 AHA Guidelines Part 11 · Oxygenation targets'},
+      },
+      {
+        type:'slider', pts:20, scene:'0h · 通氣管理', label:'Task 4 — 設定 PaCO₂ 目標',
+        hint:'設定目標動脈二氧化碳分壓 (PaCO₂)。', unit:'mmHg', min:25, max:55, init:30, step:1,
+        vital:'rass',
+        grade:(v)=> (v>=35 && v<=45)?'ok':'warn',
+        applyVital:()=>{},
+        fb:{
+          ok:'[[ok]]正確！維持正常通氣 (normocapnia) PaCO₂ 35–45 mmHg。',
+          warn:'[[warn]]過度換氣 (低 PaCO₂) 致腦血管收縮缺血；高 PaCO₂ 致顱內壓上升。建議 35–45 mmHg。',
+        },
+        evidence:{title:'為什麼 PaCO₂ 35–45 mmHg？',
+          body:'PaCO₂ 強烈影響腦血流：低碳酸血症 (hypocapnia) 造成腦血管收縮、加重缺血；高碳酸血症升高顱內壓。2025 AHA 建議維持 normocapnia (PaCO₂ 35–45 mmHg)。',
+          cite:'2025 AHA Guidelines Part 11 · Ventilation targets'},
+      },
+      {
+        type:'slider', pts:20, scene:'0h · 體溫控制 TTM', label:'Task 5 — 設定目標體溫 (TTM)',
+        hint:'設定 Targeted Temperature Management 目標。', unit:'°C', min:31, max:39, init:38.5, step:0.5,
+        vital:'temp',
+        grade:(v)=> v>37.5?'bad': (v>=32 && v<=37.5)?'ok':'warn',
+        applyVital:(v)=>{ STATE.vitals.temp = v>37.5?38.6 : v<32?31.5:36.0; },
+        fb:{
+          ok:'[[ok]]正確！目標 32–37.5°C 並積極避免發燒 (fever)。',
+          warn:'[[warn]]過低 (<32°C) 增加併發症風險。',
+          bad:'[[bad]]必須避免發燒 (fever > 37.5°C)！發燒與不良神經預後相關。',
+        },
+        evidence:{title:'為什麼避免發燒？TTM 目標？',
+          body:'TTM2 trial 顯示 33°C 與正常體溫 (≤37.5°C) 在死亡率與神經預後無顯著差異，但兩組皆積極避免發燒。2025 AHA 建議維持目標體溫 32–37.5°C，最關鍵的是主動預防發燒。',
+          cite:'2025 AHA Guidelines Part 11 · TTM2 Trial (NEJM 2021)'},
+      },
+    ],
+  },
+
+  'L1-2': {
+    code:'L1-2', title:'體溫管理的24小時',
+    desc:'同一病人。TTM 進行中，處理顫抖、血壓與時長決策。',
+    patient:'病人延續：55歲男性，TTM 進行中，目標體溫 36°C。',
+    badge:{icon:'thermometer',name:'體溫管理大師'},
+    next:'L2-1',
+    initVitals:{map:82,hr:78,temp:36.0,spo2:96,rass:-3},
+    steps:[
+      {
+        type:'mc', pts:34, scene:'0–6h · 顫抖 Shivering', label:'病人開始顫抖 (shivering)',
+        hint:'顫抖會升高代謝需求並對抗降溫，須處理。', vital:'temp',
+        multiCorrect:true,
+        opts:[
+          {k:'A',t:'增加鎮靜 (Propofol)',correct:true,fb:'[[ok]]可行！加深鎮靜抑制顫抖。',applyVital:()=>{STATE.vitals.rass=-4;}},
+          {k:'B',t:'神經肌肉阻斷劑 (NMBA)',correct:true,fb:'[[ok]]可行！NMBA 可有效控制難治顫抖。',applyVital:()=>{STATE.vitals.temp=36.0;}},
+          {k:'C',t:'提高目標體溫至 38°C',correct:false,fb:'[[warn]]不應為了止抖而放棄體溫目標、造成發燒。'},
+        ],
+        evidence:{title:'為什麼要控制顫抖？',
+          body:'顫抖 (shivering) 大幅增加代謝需求、產熱對抗降溫並增加耗氧。處理方式包括加深鎮靜 (Propofol)、必要時使用神經肌肉阻斷劑 (NMBA)，而非放棄體溫目標。',
+          cite:'2025 AHA Guidelines Part 11 · TTM management'},
+      },
+      {
+        type:'mc', pts:33, scene:'6–12h · 血壓下降', label:'MAP 降至 60 mmHg',
+        hint:'同時注意鎮靜藥的降壓副作用。', vital:'map',
+        opts:[
+          {k:'A',t:'只增加 Norepinephrine',correct:false,fb:'部分正確，但別忽略 Propofol 造成的低血壓。'},
+          {k:'B',t:'只減少 Propofol',correct:false,fb:'部分正確，但可能仍需升壓藥支持。'},
+          {k:'C',t:'兩者皆是 — 增加 Norepinephrine 並減少 Propofol',correct:true,
+            fb:'[[ok]]正確！同時提升升壓藥並下調過量鎮靜，兼顧 MAP 與顫抖控制。',applyVital:()=>{STATE.vitals.map=83;STATE.vitals.rass=-3;}},
+        ],
+        evidence:{title:'為什麼兩者皆需？',
+          body:'Propofol 具血管擴張與負性肌力作用，過量會壓低 MAP。當 post-ROSC 病人血壓下降，應同時調整升壓藥 (Norepinephrine) 並評估減少鎮靜劑量，維持 MAP ≥ 80 mmHg 的腦灌流。',
+          cite:'2025 AHA Guidelines Part 11 · Hemodynamic management'},
+      },
+      {
+        type:'mc', pts:33, scene:'12–24h · 體溫控制時長', label:'TTM 應維持多久？',
+        hint:'依 2025 指引選擇控溫時長。', vital:'temp', anyAccept:true,
+        opts:[
+          {k:'A',t:'至少 36 小時',correct:true,fb:'[[ok]]可接受！指引建議積極控溫至少 36 小時。'},
+          {k:'B',t:'48 小時',correct:true,fb:'[[ok]]可接受！延長控溫並持續避免發燒。'},
+          {k:'C',t:'72 小時',correct:true,fb:'[[ok]]可接受！持續監測並預防反彈性發燒 (rebound fever)。'},
+        ],
+        evidence:{title:'控溫應維持多久？',
+          body:'2025 AHA 建議 post-ROSC 主動體溫控制至少維持約 36 小時，之後仍須持續避免反彈性發燒 (rebound fever)。確切時長可依機構流程與病人狀況調整。',
+          cite:'2025 AHA Guidelines Part 11 · Duration of TTM'},
+      },
+    ],
+  },
+
+  'L2-1': {
+    code:'L2-1', title:'癲癇危機',
+    desc:'70歲女性 PEA，ROSC 於第4輪。ROSC 後6小時突發抽搐。',
+    patient:'病人：70歲女性，PEA cardiac arrest，第4輪 CPR 後 ROSC。ROSC 後 6 小時突然全身抽搐 (seizure)。',
+    badge:{icon:'bolt',name:'癲癇獵人'},
+    next:'L2-2',
+    initVitals:{map:84,hr:104,temp:36.2,spo2:95,rass:-3},
+    hasTimer:true,  // time-pressure event before step 0
+    steps:[
+      {
+        type:'mc', pts:25, scene:'6h · 突發抽搐', label:'Task 1 — 初始處置',
+        hint:'兼顧立即治療與確診監測。', vital:'rass', multiCorrect:true,
+        opts:[
+          {k:'A',t:'立即給 Lorazepam (benzodiazepine)',correct:true,fb:'[[ok]]立即終止抽搐的第一線藥物。',applyVital:()=>{STATE.vitals.hr=92;}},
+          {k:'B',t:'連續 EEG 監測 (continuous EEG)',correct:true,fb:'[[ok]]確認是否為臨床下癲癇 (non-convulsive seizure)。'},
+          {k:'C',t:'只增加鎮靜',correct:false,fb:'[[warn]]單純加深鎮靜可能掩蓋癲癇活動，未處理根本問題。'},
+        ],
+        evidence:{title:'為什麼 Lorazepam + EEG？',
+          body:'Post-ROSC 抽搐須立即以 benzodiazepine (如 Lorazepam) 終止，同時 post-arrest 病人常有臨床下癲癇 (non-convulsive status)，須以連續 EEG 監測偵測與評估療效。',
+          cite:'2025 AHA Guidelines Part 11 · Seizure management'},
+      },
+      {
+        type:'mc', pts:25, scene:'6h · 抗癲癇藥', label:'Task 2 — 維持型抗癲癇藥 (ASM)',
+        hint:'選擇 benzodiazepine 後的維持用藥。', vital:'rass', anyAcceptList:['A','C'],
+        opts:[
+          {k:'A',t:'Levetiracetam 1000 mg',correct:true,fb:'[[ok]]正確！常用且交互作用少的維持型抗癲癇藥。'},
+          {k:'B',t:'Phenytoin',correct:false,fb:'可用但交互作用與低血壓風險較高，非首選。'},
+          {k:'C',t:'Valproate',correct:true,fb:'[[ok]]亦可接受的維持型抗癲癇藥選擇。'},
+        ],
+        evidence:{title:'為什麼 Levetiracetam？',
+          body:'Benzodiazepine 控制急性發作後需給維持型抗癲癇藥 (ASM)。Levetiracetam 因交互作用少、不需頻繁血中濃度監測而常用；Valproate 亦為合理選擇。Phenytoin 受限於低血壓與藥物交互作用。',
+          cite:'2025 AHA Guidelines Part 11 · Antiseizure medication'},
+      },
+      {
+        type:'mc', pts:25, scene:'12h · EEG 判讀', label:'Task 3 — EEG 結果判讀',
+        hint:'抽搐已停但病人未醒，EEG 顯示持續放電。', vital:'rass',
+        opts:[
+          {k:'A',t:'持續癲癇活動 — status epilepticus',correct:true,fb:'[[ok]]正確！為癲癇重積狀態，須升級治療。',applyVital:()=>{STATE.vitals.hr=98;}},
+          {k:'B',t:'正常 EEG',correct:false,fb:'[[bad]]持續放電並非正常。'},
+          {k:'C',t:'Burst suppression',correct:false,fb:'[[bad]]Burst suppression 為深鎮靜型態，與持續放電不同。'},
+        ],
+        evidence:{title:'如何判讀此 EEG？',
+          body:'持續、節律性的癲癇樣放電合併意識未恢復，符合癲癇重積狀態 (status epilepticus)，需要升級抗癲癇治療。Burst suppression 則是深度鎮靜/麻醉下的爆發-抑制型態，意義不同。',
+          cite:'2025 AHA Guidelines Part 11 · EEG interpretation'},
+      },
+      {
+        type:'mc', pts:25, scene:'24h · 難治性癲癇', label:'Task 4 — Refractory status epilepticus',
+        hint:'第一線藥物無效，如何升級？', vital:'rass', anyAcceptList:['B','C'],
+        opts:[
+          {k:'A',t:'只增加 Levetiracetam 劑量',correct:false,fb:'[[warn]]單藥加量對難治性癲癇通常不足。'},
+          {k:'B',t:'加第二種抗癲癇藥',correct:true,fb:'[[ok]]可行！加上第二種 ASM。',applyVital:()=>{STATE.vitals.hr=88;}},
+          {k:'C',t:'持續輸注 Midazolam',correct:true,fb:'[[ok]]可行！難治性癲癇可用持續 Midazolam 輸注。',applyVital:()=>{STATE.vitals.hr=86;}},
+        ],
+        evidence:{title:'難治性癲癇如何處理？',
+          body:'第一線 benzodiazepine 加維持型 ASM 後仍持續放電 (refractory status epilepticus)，應升級：加用第二種抗癲癇藥，或以持續輸注麻醉劑量藥物 (如 Midazolam) 達到癲癇控制/burst suppression，並持續 EEG 監測。',
+          cite:'2025 AHA Guidelines Part 11 · Refractory seizures'},
+      },
+    ],
+  },
+
+  'L2-2': {
+    code:'L2-2', title:'H’s & T’s 可逆原因排查 Reversible Causes',
+    desc:'62歲洗腎(ESRD)男性，今日未透析，突發 PEA cardiac arrest。系統性排查可逆原因並緊急處置。',
+    patient:'病人：62歲男性，末期腎病 (ESRD) 長期血液透析，今日未透析。突發無脈性電氣活動 (PEA) cardiac arrest。',
+    badge:{icon:'search',name:'可逆原因獵人'},
+    next:'L2-3',
+    initVitals:{map:48,hr:36,temp:36.4,spo2:88,rass:-5},
+    steps:[
+      {
+        type:'info', pts:15, scene:'急救中 · 系統性思維', label:'Step A — H’s & T’s 架構',
+        hint:'PEA / Asystole 不可電擊，關鍵在於系統性找出並矯正可逆原因。',
+        body:`<div style="margin:6px 0 4px;font-size:13.5px;color:var(--muted);">${icon('clipboard')} 對每一位 PEA / Asystole 病人，逐項排查 H’s & T’s：</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px;">
+            <div style="background:#0e1c2b;border:1px solid var(--line);border-radius:11px;padding:12px 14px;">
+              <div style="font-weight:800;color:var(--accent2);margin-bottom:8px;">5 H’s</div>
+              <div style="font-size:13.5px;line-height:2;">
+                ${icon('check','ico-ok')} Hypovolemia 低血容<br>
+                ${icon('check','ico-ok')} Hypoxia 缺氧<br>
+                ${icon('check','ico-ok')} Hydrogen ion 酸中毒 (acidosis)<br>
+                ${icon('check','ico-ok')} Hypo-/Hyperkalemia 低/高血鉀<br>
+                ${icon('check','ico-ok')} Hypothermia 低體溫
+              </div>
+            </div>
+            <div style="background:#0e1c2b;border:1px solid var(--line);border-radius:11px;padding:12px 14px;">
+              <div style="font-weight:800;color:var(--accent2);margin-bottom:8px;">5 T’s</div>
+              <div style="font-size:13.5px;line-height:2;">
+                ${icon('check','ico-ok')} Tension pneumothorax 張力性氣胸<br>
+                ${icon('check','ico-ok')} Tamponade 心包填塞<br>
+                ${icon('check','ico-ok')} Toxins 毒素 / 藥物<br>
+                ${icon('check','ico-ok')} Thrombosis — PE 肺栓塞<br>
+                ${icon('check','ico-ok')} Thrombosis — MI 冠狀動脈血栓
+              </div>
+            </div>
+          </div>`,
+        fb:'[[ok]]很好！記住這個架構，接下來整合線索鎖定本例的可逆原因。',
+        evidence:{title:'為什麼 PEA 要系統性排查 H’s & T’s？',
+          body:'PEA / Asystole 屬不可電擊節律，去顫無益；改善預後的關鍵是在持續高品質 CPR 與 Epinephrine 之下，系統性地逐項搜尋並矯正可逆原因 (H’s & T’s)。針對性治療可逆原因往往是達成 ROSC 的決定性步驟。',
+          cite:'2025 AHA Guidelines · ACLS · Reversible causes (H’s & T’s)'},
+      },
+      {
+        type:'mc', pts:30, scene:'急救中 · 線索整合', label:'Step B — 判斷最可能的可逆原因',
+        hint:'整合病史、ECG 與抽血線索，鎖定最可能原因。', vital:'hr',
+        body:`<div style="background:#0e1c2b;border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin:4px 0 10px;font-size:13.5px;line-height:1.9;">
+            ${icon('clipboard','ico-warn')} <b>線索 Clues</b><br>
+            • 病史：ESRD，<b>今日漏透析</b><br>
+            • ECG：<b>寬 QRS</b> + <b>高尖 T 波 (peaked T waves)</b><br>
+            • 抽血：<b>K⁺ 7.2 mmol/L</b>
+          </div>`,
+        opts:[
+          {k:'A',t:'高血鉀 Hyperkalemia',correct:true,
+            fb:'[[ok]]正確！漏透析 + 寬 QRS + 高尖 T 波 + K⁺ 7.2 -> 高血鉀導致的 PEA。',applyVital:()=>{STATE.vitals.spo2=92;}},
+          {k:'B',t:'低血容 Hypovolemia',correct:false,fb:'[[bad]]線索不支持出血/脫水，且無法解釋高尖 T 波與 K⁺ 7.2。'},
+          {k:'C',t:'張力性氣胸 Tension pneumothorax',correct:false,fb:'[[bad]]無單側呼吸音消失、氣管偏移等表現，ECG/抽血更指向高血鉀。'},
+          {k:'D',t:'肺栓塞 PE',correct:false,fb:'[[bad]]PE 不會造成高尖 T 波與 K⁺ 7.2；本例典型為高血鉀。'},
+        ],
+        evidence:{title:'為什麼是高血鉀？',
+          body:'ESRD 漏透析是高血鉀的典型情境。心電圖隨血鉀升高依序出現高尖 T 波 -> PR 延長 -> QRS 增寬 -> 正弦波 -> PEA/asystole。本例 K⁺ 7.2 mmol/L 合併寬 QRS 與高尖 T 波，最可能的可逆原因即為高血鉀。',
+          cite:'2025 AHA Guidelines · ACLS · Hyperkalemia (electrolyte)'},
+      },
+      {
+        type:'multi', pts:35, scene:'急救中 · 緊急處置', label:'Step C — 高血鉀緊急處置 (複選)',
+        hint:'選出所有正確處置。優先順序：鈣劑穩定心肌膜 -> 胰島素+葡萄糖驅鉀入細胞 -> 緊急血液透析。', vital:'hr',
+        opts:[
+          {k:'A',t:'鈣劑 Calcium gluconate / chloride（穩定心肌膜，最優先）',correct:true,priority:1},
+          {k:'B',t:'胰島素 + 葡萄糖（driving K⁺ into cells）',correct:true,priority:2},
+          {k:'C',t:'碳酸氫鈉 Sodium bicarbonate（若合併酸中毒）',correct:true,priority:3},
+          {k:'D',t:'緊急血液透析 Emergent hemodialysis（移除體內鉀）',correct:true,priority:4},
+          {k:'E',t:'只給利尿劑 (loop diuretic) 觀察',correct:false},
+          {k:'F',t:'延遲鈣劑、先安排檢查',correct:false},
+        ],
+        fbOk:'[[ok]]正確！鈣劑優先穩定心肌膜，接著胰島素+葡萄糖驅鉀入細胞、必要時碳酸氫鈉，並安排緊急血液透析移除鉀。',
+        fbPartial:'[[warn]]方向對，但有遺漏或多選。關鍵：鈣劑必須最優先穩定心肌，再加胰島素+葡萄糖與緊急透析。',
+        fbBad:'[[bad]]無尿/無效的策略！高血鉀 cardiac arrest 須先給鈣劑穩定心肌膜，不可延遲；利尿劑對無尿 ESRD 無效。',
+        evidence:{title:'高血鉀緊急處置順序',
+          body:'危及生命的高血鉀（ECG 變化 / PEA）：第一步給「鈣劑」穩定心肌細胞膜（不降鉀但立即降低致死性心律不整風險）；接著胰島素+葡萄糖（及必要時 β2-agonist、碳酸氫鈉）暫時驅鉀入細胞；最終以「緊急血液透析」移除體內鉀（對 ESRD 漏透析尤其關鍵）。利尿劑對無尿病人無效。',
+          cite:'2025 AHA Guidelines · ACLS · Hyperkalemia treatment (calcium first)'},
+      },
+      {
+        type:'result', pts:20, scene:'結果 · Outcome', label:'Step D — 處置結果',
+        threshold:0.7,
+        good:{
+          vital:()=>{STATE.vitals.map=82;STATE.vitals.hr=92;STATE.vitals.spo2=96;},
+          fb:'[[ok]]正確鎖定並優先以鈣劑處置高血鉀，血鉀下降、寬 QRS 收窄 — 達成 ROSC！進入 ROSC 後照護。',
+        },
+        bad:{
+          vital:()=>{STATE.vitals.map=40;STATE.vitals.hr=28;},
+          fb:'[[bad]]延誤辨識或延後鈣劑，高血鉀持續惡化心肌傳導，病情惡化、復甦困難。',
+        },
+        evidence:{title:'為什麼及時處置能逆轉 PEA？',
+          body:'高血鉀是少數「針對性治療即可逆轉」的 cardiac arrest 病因。在持續 CPR/Epinephrine 之下，及早辨識並依序給予鈣劑、胰島素+葡萄糖與緊急透析，可矯正根本原因而達成 ROSC；延誤辨識或延後鈣劑則使心肌傳導持續惡化、復甦失敗。',
+          cite:'2025 AHA Guidelines · ACLS · Reversible causes / Hyperkalemia'},
+      },
+    ],
+  },
+
+  'L2-3': {
+    code:'L2-3', title:'致命可逆原因：三案例 Lethal Reversible Causes',
+    desc:'三個連續迷你案例：張力性氣胸、心包填塞、大面積肺栓塞。逐案診斷與緊急處置，鑑別致命且可逆的死因。',
+    patient:'情境：三位 PEA / 即將心跳停止的病人接連送達。每一例都可能逆轉 — 關鍵在於快速鑑別並針對性處置。',
+    badge:{icon:'shield-heart',name:'急救鑑別大師'},
+    next:'L3-1',
+    initVitals:{map:46,hr:38,temp:36.3,spo2:84,rass:-5},
+    steps:[
+      /* ===== CASE 1 — Tension Pneumothorax ===== */
+      {
+        type:'mc', pts:17, caseHead:true, scene:'案例 1 · 診斷', label:'案例 1 — 張力性氣胸？ 診斷',
+        hint:'整合臨床線索，鎖定最可能的可逆死因。', vital:'spo2',
+        body:`<div style="background:#0e1c2b;border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin:4px 0 10px;font-size:13.5px;line-height:1.95;">
+            <div style="font-weight:800;color:var(--accent2);margin-bottom:6px;">${icon('clipboard','ico-warn')} 情境 1</div>
+            機械通氣中的創傷 / COPD 病人突發 PEA。<br>
+            <div style="margin-top:8px;font-weight:700;color:var(--accent2);">${icon('search')} 線索 Clues</div>
+            ${icon('check','ico-ok')} 單側呼吸音消失<br>
+            ${icon('check','ico-ok')} 氣管偏移 (tracheal deviation)<br>
+            ${icon('check','ico-ok')} 頸靜脈怒張 (JVD)<br>
+            ${icon('check','ico-ok')} 通氣阻力驟增<br>
+            ${icon('check','ico-ok')} 患側胸廓鼓脹
+          </div>`,
+        opts:[
+          {k:'A',t:'張力性氣胸 Tension pneumothorax',correct:true,
+            fb:'[[ok]]正確！單側呼吸音消失 + 氣管偏移 + JVD + 通氣阻力驟增 -> 張力性氣胸。'},
+          {k:'B',t:'心包填塞 Cardiac tamponade',correct:false,
+            fb:'[[bad]]填塞不會造成單側呼吸音消失、氣管偏移與通氣阻力驟增。'},
+          {k:'C',t:'大量血胸 Massive hemothorax',correct:false,
+            fb:'[[bad]]血胸患側為濁音、氣管多向健側，少見氣管推離與胸廓鼓脹的高壓表現。'},
+          {k:'D',t:'肺栓塞 Pulmonary embolism',correct:false,
+            fb:'[[bad]]PE 不會造成單側呼吸音消失與氣管偏移。'},
+        ],
+        evidence:{title:'張力性氣胸 — 臨床診斷',
+          body:'張力性氣胸是可立即逆轉的死因。胸腔內壓力持續升高壓迫患側肺與縱膈，臨床表現為單側呼吸音消失、氣管偏向健側、頸靜脈怒張與機械通氣阻力驟增。為臨床診斷，不應等待影像。',
+          cite:'2025 AHA Guidelines · ACLS · H’s & T’s (Tension pneumothorax)'},
+      },
+      {
+        type:'mc', pts:17, scene:'案例 1 · 處置', label:'案例 1 — 緊急處置',
+        hint:'致命且可逆 — 立即處置不可延誤。', vital:'spo2',
+        opts:[
+          {k:'A',t:'立即針刺減壓 (needle decompression) 後放置胸管',correct:true,
+            fb:'[[ok]]正確！先針刺減壓解除張力，再放置胸管確定處理。',applyVital:()=>{STATE.vitals.spo2=95;STATE.vitals.map=82;}},
+          {k:'B',t:'先安排胸部 X 光確認再處置',correct:false,
+            fb:'[[warn]]張力性氣胸是臨床診斷，等影像會延誤致命 — 不可等待。'},
+          {k:'C',t:'增加 PEEP 改善氧合',correct:false,
+            fb:'[[bad]]增加 PEEP 會升高胸內壓、惡化張力性氣胸。'},
+          {k:'D',t:'立即心包穿刺 pericardiocentesis',correct:false,
+            fb:'[[bad]]錯誤部位 — 心包穿刺無法解除胸腔張力。'},
+        ],
+        evidence:{title:'張力性氣胸 — 立即處置',
+          body:'張力性氣胸須立即針刺減壓 (needle decompression)，隨後放置胸管確定處理。臨床診斷不應等待影像；增加 PEEP 會惡化張力，心包穿刺則為錯誤部位。',
+          cite:'2025 AHA Guidelines · ACLS · H’s & T’s (Tension pneumothorax)'},
+      },
+      {
+        type:'result', pts:0, caseStart:0, threshold:0.99, scene:'案例 1 · 結果', label:'案例 1 — 結果',
+        good:{
+          vital:()=>{STATE.vitals.map=84;STATE.vitals.hr=92;STATE.vitals.spo2=96;},
+          fb:'[[ok]]即時針刺減壓解除張力，靜脈回流恢復、氧合改善 — 達成 ROSC！',
+        },
+        bad:{
+          vital:()=>{STATE.vitals.map=40;STATE.vitals.spo2=80;STATE.vitals.hr=30;},
+          fb:'[[bad]]延誤或錯誤處置，胸內壓持續升高壓迫心臟與大血管，病人持續惡化。',
+        },
+        evidence:{title:'案例 1 回顧 — 張力性氣胸',
+          body:'張力性氣胸是可在床邊立即逆轉的死因；及時針刺減壓可瞬間恢復靜脈回流與心輸出。等待影像或誤用 PEEP / 心包穿刺都會延誤致命。',
+          cite:'2025 AHA Guidelines · ACLS · H’s & T’s (Tension pneumothorax)'},
+      },
+
+      /* ===== CASE 2 — Cardiac Tamponade ===== */
+      {
+        type:'mc', pts:17, caseHead:true, scene:'案例 2 · 診斷', label:'案例 2 — 心包填塞？ 診斷',
+        hint:'整合 Beck 三徵與床邊超音波，鎖定可逆死因。', vital:'map',
+        body:`<div style="background:#0e1c2b;border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin:4px 0 10px;font-size:13.5px;line-height:1.95;">
+            <div style="font-weight:800;color:var(--accent2);margin-bottom:6px;">${icon('clipboard','ico-warn')} 情境 2</div>
+            近期心肌梗塞 / 心臟術後或尿毒症病人突發 PEA。<br>
+            <div style="margin-top:8px;font-weight:700;color:var(--accent2);">${icon('search')} 線索 Clues</div>
+            ${icon('check','ico-ok')} Beck 三徵：低血壓、頸靜脈怒張、心音遙遠<br>
+            ${icon('check','ico-ok')} 奇脈 (pulsus paradoxus)<br>
+            ${icon('check','ico-ok')} 床邊超音波：大量心包積液 + 右心室舒張期塌陷<br>
+            ${icon('check','ico-ok')} ECG：低電壓 / electrical alternans
+          </div>`,
+        opts:[
+          {k:'A',t:'心包填塞 Cardiac tamponade',correct:true,
+            fb:'[[ok]]正確！Beck 三徵 + 奇脈 + 超音波右室舒張期塌陷 -> 心包填塞。'},
+          {k:'B',t:'張力性氣胸 Tension pneumothorax',correct:false,
+            fb:'[[bad]]氣胸不會有心包積液與右室舒張期塌陷，呼吸音與氣管表現也不同。'},
+          {k:'C',t:'急性心衰竭 Acute heart failure',correct:false,
+            fb:'[[bad]]急性心衰竭無法解釋大量心包積液與舒張期塌陷的填塞生理。'},
+          {k:'D',t:'主動脈剝離 Aortic dissection',correct:false,
+            fb:'[[bad]]剝離可能續發填塞，但本例線索直接指向心包填塞生理。'},
+        ],
+        evidence:{title:'心包填塞 — 診斷',
+          body:'心包填塞典型為 Beck 三徵（低血壓、頸靜脈怒張、心音遙遠）合併奇脈；床邊超音波見大量心包積液與右心室舒張期塌陷，ECG 可見低電壓或 electrical alternans。心臟術後、心肌梗塞與尿毒症為常見情境。',
+          cite:'2025 AHA Guidelines · ACLS · H’s & T’s (Tamponade)'},
+      },
+      {
+        type:'mc', pts:16, scene:'案例 2 · 處置', label:'案例 2 — 緊急處置',
+        hint:'解除壓迫才能逆轉 — 選出決定性處置。', vital:'map',
+        opts:[
+          {k:'A',t:'超音波導引心包穿刺 pericardiocentesis',correct:true,
+            fb:'[[ok]]正確！超音波導引心包穿刺立即引流、解除壓迫。',applyVital:()=>{STATE.vitals.map=84;STATE.vitals.hr=96;}},
+          {k:'B',t:'大量輸液後觀察',correct:false,
+            fb:'[[warn]]輸液僅能暫時支撐前負荷，不解除壓迫，不可作為確定處置。'},
+          {k:'C',t:'立即放置胸管引流',correct:false,
+            fb:'[[bad]]錯誤 — 胸管引流胸腔，無法引流心包腔。'},
+          {k:'D',t:'給予利尿劑',correct:false,
+            fb:'[[bad]]利尿劑降低前負荷會惡化填塞的低心輸出。'},
+        ],
+        evidence:{title:'心包填塞 — 處置',
+          body:'心包填塞需緊急引流解除壓迫，超音波導引心包穿刺為關鍵處置。大量輸液僅為暫時支撐；胸管為錯誤部位；利尿劑會降低前負荷而惡化血流動力學。',
+          cite:'2025 AHA Guidelines · ACLS · H’s & T’s (Tamponade)'},
+      },
+      {
+        type:'result', pts:0, caseStart:3, threshold:0.99, scene:'案例 2 · 結果', label:'案例 2 — 結果',
+        good:{
+          vital:()=>{STATE.vitals.map=85;STATE.vitals.hr=94;STATE.vitals.spo2=96;},
+          fb:'[[ok]]超音波導引心包穿刺引流積液、解除壓迫，心輸出恢復 — 達成 ROSC！',
+        },
+        bad:{
+          vital:()=>{STATE.vitals.map=38;STATE.vitals.hr=32;},
+          fb:'[[bad]]未及時引流心包腔，壓迫持續限制心室充盈，病人持續惡化。',
+        },
+        evidence:{title:'案例 2 回顧 — 心包填塞',
+          body:'心包填塞的決定性處置是緊急引流（超音波導引心包穿刺）。床邊超音波是關鍵診斷工具；輸液僅能暫時爭取時間，不可取代引流。',
+          cite:'2025 AHA Guidelines · ACLS · H’s & T’s (Tamponade)'},
+      },
+
+      /* ===== CASE 3 — Massive Pulmonary Embolism ===== */
+      {
+        type:'mc', pts:17, caseHead:true, scene:'案例 3 · 診斷', label:'案例 3 — 大面積肺栓塞？ 診斷',
+        hint:'整合右心受累與栓塞線索，鎖定可逆死因。', vital:'spo2',
+        body:`<div style="background:#0e1c2b;border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin:4px 0 10px;font-size:13.5px;line-height:1.95;">
+            <div style="font-weight:800;color:var(--accent2);margin-bottom:6px;">${icon('clipboard','ico-warn')} 情境 3</div>
+            術後 / 長期臥床 / 有 DVT 病史的病人突發 PEA。<br>
+            <div style="margin-top:8px;font-weight:700;color:var(--accent2);">${icon('search')} 線索 Clues</div>
+            ${icon('check','ico-ok')} 不明原因低血壓 + 低血氧<br>
+            ${icon('check','ico-ok')} 超音波：右心室擴大與 D-shape<br>
+            ${icon('check','ico-ok')} ECG：S1Q3T3<br>
+            ${icon('check','ico-ok')} EtCO₂ 驟降<br>
+            ${icon('check','ico-ok')} 單側下肢腫脹
+          </div>`,
+        opts:[
+          {k:'A',t:'大面積肺栓塞 Massive pulmonary embolism',correct:true,
+            fb:'[[ok]]正確！右室擴大 + D-shape + S1Q3T3 + EtCO₂ 驟降 + DVT -> 大面積 PE。'},
+          {k:'B',t:'心肌梗塞 Myocardial infarction',correct:false,
+            fb:'[[bad]]MI 不會典型出現 D-shape 右室擴大與 S1Q3T3 的急性右心受累型態。'},
+          {k:'C',t:'張力性氣胸 Tension pneumothorax',correct:false,
+            fb:'[[bad]]氣胸無右室擴大 / D-shape，呼吸音與氣管表現也不同。'},
+          {k:'D',t:'敗血症 Sepsis',correct:false,
+            fb:'[[bad]]敗血症不會造成急性右室擴大、D-shape 與 EtCO₂ 驟降的栓塞表現。'},
+        ],
+        evidence:{title:'大面積肺栓塞 — 診斷',
+          body:'大面積 PE 造成急性右心後負荷上升：超音波見右心室擴大與室間隔 D-shape，ECG 可見 S1Q3T3，EtCO₂ 因肺血流驟減而下降；常見於術後、長期臥床或有 DVT 病史的病人。',
+          cite:'2025 AHA Guidelines · ACLS · H’s & T’s (Thrombosis — PE)'},
+      },
+      {
+        type:'mc', pts:16, scene:'案例 3 · 處置', label:'案例 3 — 緊急處置',
+        hint:'心跳停止 / 即將停止時，如何處理可逆的栓塞阻塞？', vital:'spo2',
+        opts:[
+          {k:'A',t:'持續 CPR 下考慮全身性溶栓 (alteplase)，必要時 ECPR / 取栓',correct:true,
+            fb:'[[ok]]正確！疑似 PE 心跳停止可在 CPR 中溶栓並延長 CPR，考慮 ECPR。',applyVital:()=>{STATE.vitals.spo2=94;STATE.vitals.map=82;}},
+          {k:'B',t:'等待 CT 肺動脈攝影確診再處置',correct:false,
+            fb:'[[warn]]心跳停止時無法安全搬運做 CTPA，等待會延誤致命。'},
+          {k:'C',t:'僅給予升壓劑維持血壓',correct:false,
+            fb:'[[warn]]升壓劑不解決栓塞阻塞，無法逆轉根本原因。'},
+          {k:'D',t:'給予抗血小板藥',correct:false,
+            fb:'[[bad]]抗血小板藥對大面積 PE 不足以溶解血栓。'},
+        ],
+        evidence:{title:'大面積肺栓塞 — 處置',
+          body:'疑似 PE 導致的心跳停止可在持續 CPR 下給予全身性溶栓 (alteplase)，並延長 CPR 時間以利藥物作用；條件允許時考慮 ECPR 或外科 / 導管取栓。等待 CTPA 在心跳停止時不可行；單純升壓或抗血小板藥皆不足。',
+          cite:'2025 AHA Guidelines · ACLS · H’s & T’s (Thrombosis — PE)'},
+      },
+      {
+        type:'result', pts:0, caseStart:6, threshold:0.99, scene:'案例 3 · 結果', label:'案例 3 — 結果',
+        good:{
+          vital:()=>{STATE.vitals.map=84;STATE.vitals.hr=98;STATE.vitals.spo2=95;},
+          fb:'[[ok]]CPR 中溶栓溶解血栓、右心後負荷下降，EtCO₂ 回升 — 達成 ROSC！',
+        },
+        bad:{
+          vital:()=>{STATE.vitals.map=36;STATE.vitals.spo2=78;STATE.vitals.hr=28;},
+          fb:'[[bad]]未針對栓塞阻塞處置，右心衰竭持續、循環無法重建，病人持續惡化。',
+        },
+        evidence:{title:'案例 3 回顧 — 大面積肺栓塞',
+          body:'疑似 PE 的心跳停止可在 CPR 中溶栓並延長 CPR 時間，並考慮 ECPR；針對阻塞的治療才能逆轉右心衰竭。等待影像或僅給升壓 / 抗血小板藥都無法解除致命阻塞。',
+          cite:'2025 AHA Guidelines · ACLS · H’s & T’s (Thrombosis — PE)'},
+      },
+    ],
+  },
+
+  'L3-1': {
+    code:'L3-1', title:'STEMI 與血流動力學不穩定',
+    desc:'60歲男性 VF，ROSC 後 ECG 顯示前壁 STEMI。',
+    patient:'病人：60歲男性，VF cardiac arrest，ROSC 後 12-lead ECG 顯示前壁 ST 段上升 (anterior STEMI)，血流動力學不穩定。',
+    badge:{icon:'target',name:'心臟救援專家'},
+    next:null,
+    initVitals:{map:78,hr:108,temp:36.1,spo2:95,rass:-3},
+    steps:[
+      {
+        type:'mc', pts:34, scene:'0h · ECG 判讀', label:'Task 1 — 12-lead ECG 判讀',
+        hint:'前壁導程 ST 段明顯抬高。', vital:'map',
+        opts:[
+          {k:'A',t:'STEMI — 需緊急冠狀動脈造影 (emergent coronary angiography)',correct:true,
+            fb:'[[ok]]正確！STEMI 應立即心導管室介入。'},
+          {k:'B',t:'非 STEMI (NSTEMI)',correct:false,fb:'[[bad]]ST 段抬高符合 STEMI 而非 NSTEMI。'},
+          {k:'C',t:'正常 ECG',correct:false,fb:'[[bad]]前壁 ST 抬高並非正常。'},
+        ],
+        evidence:{title:'為什麼 STEMI 要緊急造影？',
+          body:'Post-ROSC 合併 STEMI 的病人應接受緊急冠狀動脈造影與 PCI，及早再灌流。2025 AHA 建議對疑似心因性 cardiac arrest 且 ECG 顯示 STEMI 者立即冠脈攝影。',
+          cite:'2025 AHA Guidelines Part 11 · Coronary angiography & PCI'},
+      },
+      {
+        type:'mc', pts:33, scene:'0h · 時間管理', label:'Task 2 — 處置順序與時機',
+        hint:'STEMI 是時間就是心肌 (time is muscle)。', vital:'hr',
+        opts:[
+          {k:'A',t:'先完全穩定病人再考慮造影',correct:false,fb:'[[warn]]延遲再灌流會擴大心肌壞死。'},
+          {k:'B',t:'先做體溫控制，延遲造影',correct:false,fb:'[[bad]]不應為了 TTM 而延遲緊急 PCI。'},
+          {k:'C',t:'立即造影，同時並行其他重症處置 (multitasking)',correct:true,
+            fb:'[[ok]]正確！緊急 PCI 與血流動力學、TTM 等處置並行。',applyVital:()=>{STATE.vitals.map=84;STATE.vitals.hr=92;}},
+        ],
+        evidence:{title:'為什麼要並行處置？',
+          body:'STEMI 「time is muscle」，緊急冠脈造影/PCI 不應因 TTM 或追求完全穩定而延遲。重症照護 (升壓、通氣、控溫) 與心導管應同時並行，把握再灌流時機。',
+          cite:'2025 AHA Guidelines Part 11 · Timing of intervention'},
+      },
+      {
+        type:'mc', pts:33, scene:'24h · 造影後', label:'Task 3 — PCI 後續照護',
+        hint:'血管已打通，接下來體溫策略？', vital:'temp',
+        opts:[
+          {k:'A',t:'繼續體溫控制至 36 小時 (避免發燒)',correct:true,
+            fb:'[[ok]]正確！PCI 後持續 TTM 與避免發燒。',applyVital:()=>{STATE.vitals.temp=36.0;}},
+          {k:'B',t:'停止所有體溫控制',correct:false,fb:'[[bad]]太早停止增加反彈性發燒風險。'},
+          {k:'C',t:'改成高溫目標 (≥38°C)',correct:false,fb:'[[bad]]發燒與不良神經預後相關，絕不可主動升溫。'},
+        ],
+        evidence:{title:'PCI 後為何續行 TTM？',
+          body:'成功 PCI 不改變昏迷病人的神經保護需求。應持續主動體溫控制 (至少約 36 小時) 並嚴格避免發燒，與心臟介入並行，以兼顧心肌與腦部預後。',
+          cite:'2025 AHA Guidelines Part 11 · Post-PCI care · TTM2 Trial'},
+      },
+    ],
+  },
+};
+const LEVEL_ORDER = ['L0-1','L1-1','L1-2','L2-1','L2-2','L2-3','L3-1'];
+
+/* ============================================================
+   NAV
+============================================================ */
+function go(name){
+  // stop any running mini-game timers/animations
+  clearInterval(timerInterval);
+  if(typeof rgAnim!=='undefined') clearInterval(rgAnim);
+  if(typeof RG!=='undefined' && RG.timer) clearInterval(RG.timer);
+  if(typeof RAPID!=='undefined' && RAPID.timer) clearInterval(RAPID.timer);
+  if(typeof REVIEW!=='undefined' && REVIEW.timer) clearInterval(REVIEW.timer);
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+  document.getElementById('screen-'+name).classList.remove('hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(name==='levels') renderLevels();
+  if(name==='refs') renderRefs();
+  if(name==='report') renderReport();
+  updateHUD();
+}
+function updateHUD(){
+  document.getElementById('hudScore').textContent = STATE.totalScore;
+  document.getElementById('hudBadges').innerHTML = STATE.badges.length ? STATE.badges.map(b=>icon(b.icon)).join(' ') : '—';
+}
+
+/* ============================================================
+   LEVEL SELECT
+============================================================ */
+function renderLevels(){
+  const grid = document.getElementById('levelGrid');
+  grid.innerHTML='';
+  LEVEL_ORDER.forEach(code=>{
+    const L = LEVELS[code];
+    const unlocked = STATE.unlocked[code];
+    const done = STATE.completed[code];
+    const el = document.createElement('div');
+    el.className = 'level' + (unlocked?'':' locked');
+    let stamp = done ? `<div class="stamp">${icon(L.badge.icon)}</div>` : '';
+    let stars = '';
+    if(done){
+      const pct = done.score/done.max;
+      const n = pct>=0.9?3:pct>=0.6?2:1;
+      stars = '<span class="stars">'+icon('star-filled').repeat(n)+icon('star-outline').repeat(3-n)+'</span>';
+    }
+    el.innerHTML = `
+      ${stamp}
+      <div class="code">${code}</div>
+      <h3>${L.title}</h3>
+      <div class="desc">${L.desc}</div>
+      <div class="foot">
+        <span>${unlocked? (done?('得分 '+done.score+'/'+done.max):'可挑戰') : '<span class="lock-icon">'+icon('lock')+'</span> 未解鎖'}</span>
+        ${stars}
+      </div>`;
+    if(unlocked) el.onclick = ()=>startLevel(code);
+    grid.appendChild(el);
+  });
+  // finish button enabled if at least one completed
+  document.getElementById('finishBtn').disabled = Object.keys(STATE.completed).length===0;
+}
+
+/* ============================================================
+   GAMEPLAY
+============================================================ */
+let timerInterval = null;
+
+/* fresh campaign run from the start screen: reset the vitals time series */
+function beginCampaign(){
+  STATE.vitalsLog = [];
+  STATE.wrongLog = [];
+  go('levels');
+}
+
+function startLevel(code){
+  const L = LEVELS[code];
+  STATE.currentLevel = code;
+  STATE.stepIndex = 0;
+  STATE.levelScore = 0;
+  STATE.levelMax = L.steps ? L.steps.reduce((a,s)=>a+s.pts,0) : (L.maxScore||100);
+  STATE.levelMistakes = [];
+  STATE.vitals = Object.assign({}, L.initVitals);
+  // record the level's opening vitals snapshot for the trend chart
+  logVitals(stepTimeLabel(L.steps && L.steps[0], L.code+' 起'));
+  go('play');
+  drawECG();
+  renderVitals();
+  if(L.mode==='rhythm'){
+    renderRhythmGame(L);
+  } else if(L.hasTimer){
+    renderTimerEvent(L);
+  } else {
+    renderStep();
+  }
+}
+
+function renderTimerEvent(L){
+  // 30-second time-pressure VT/VF event
+  document.getElementById('sceneLabel').innerHTML = icon('warn','ico-warn') + ' 緊急事件 EMERGENCY';
+  document.getElementById('ptLine').textContent = L.patient;
+  document.getElementById('progDots').innerHTML='';
+  document.getElementById('qContainer').innerHTML='';
+  document.getElementById('playActions').innerHTML='';
+  STATE.vitals.hr = 180; STATE.vitals.map = 50; renderVitals(); drawECG(true);
+
+  const slot = document.getElementById('timerSlot');
+  slot.innerHTML = `
+    <div class="timer-banner">
+      <div class="countdown" id="cd">30</div>
+      <div>
+        <div style="font-weight:800;color:var(--bad);">監視器警報：Pulseless VT / VF！</div>
+        <div style="font-size:13px;color:#f3c9c9;">病人出現無脈性心室頻脈，請在時間內立即處置！</div>
+      </div>
+    </div>
+    <div class="qbox" style="margin-top:0;">
+      <h3>立即處置？</h3>
+      <div class="hint">時間就是生命 — 30 秒內選擇。</div>
+      <div class="opts">
+        <button class="opt" onclick="resolveTimer(true)"><span class="k">A</span> 立即電擊 Defibrillation + 恢復 CPR</button>
+        <button class="opt" onclick="resolveTimer(false,'單純加鎮靜')"><span class="k">B</span> 增加鎮靜後再觀察</button>
+        <button class="opt" onclick="resolveTimer(false,'先抽血檢驗')"><span class="k">C</span> 先安排抽血與影像</button>
+      </div>
+    </div>`;
+  let t = 30;
+  clearInterval(timerInterval);
+  timerInterval = setInterval(()=>{
+    t--;
+    const cd = document.getElementById('cd');
+    if(cd) cd.textContent = t;
+    if(t<=0){
+      clearInterval(timerInterval);
+      resolveTimer(false,'超時未處置');
+    }
+  },1000);
+}
+
+function resolveTimer(correct, why){
+  clearInterval(timerInterval);
+  const L = LEVELS[STATE.currentLevel];
+  const slot = document.getElementById('timerSlot');
+  if(correct){
+    STATE.vitals.hr = 104; STATE.vitals.map = 84; renderVitals(); drawECG(false);
+    logVitals('緊急 後');
+    slot.innerHTML = `<div class="feedback ok">${icon('check','ico-ok')} 即時電擊並恢復 CPR — 再次 ROSC！血流動力學回穩。
+      <div><button class="evidence-btn" onclick="openModal('為什麼立即電擊？','無脈性 VT/VF 屬可電擊節律 (shockable rhythm)，須立即去顫並恢復高品質 CPR，不可延遲。任何延誤都降低存活與神經預後。','2025 AHA Guidelines · ACLS Cardiac Arrest Algorithm')">為什麼？ 證據 ${icon('arrow-right')}</button></div></div>`;
+    STATE.levelScore += 10; // bonus
+  } else {
+    STATE.vitals.map = 45; renderVitals();
+    logVitals('緊急 後');
+    slot.innerHTML = `<div class="feedback bad">${icon('cross','ico-bad')} 處置延誤（${why}）。無脈性 VT/VF 須立即電擊！本次未得加分，但病人經團隊補救後再次 ROSC，繼續照護。
+      <div><button class="evidence-btn" onclick="openModal('為什麼立即電擊？','無脈性 VT/VF 屬可電擊節律 (shockable rhythm)，須立即去顫並恢復高品質 CPR，不可延遲。','2025 AHA Guidelines · ACLS Cardiac Arrest Algorithm')">為什麼？ 證據 ${icon('arrow-right')}</button></div></div>`;
+    STATE.levelMistakes.push('緊急事件：未立即電擊無脈性 VT/VF。');
+  }
+  const act = document.getElementById('playActions');
+  act.innerHTML = `<button class="btn" onclick="startStepsAfterTimer()">繼續照護 ${icon('arrow-right')}</button>`;
+}
+function startStepsAfterTimer(){
+  document.getElementById('timerSlot').innerHTML='';
+  STATE.vitals = Object.assign({}, LEVELS[STATE.currentLevel].initVitals);
+  renderVitals(); drawECG();
+  logVitals(stepTimeLabel(LEVELS[STATE.currentLevel].steps[0], '照護 起'));
+  renderStep();
+}
+
+/* ============================================================
+   RHYTHM RECOGNITION MINI-GAME (timed)
+============================================================ */
+let rgAnim = null;
+const RG = { strips:[], idx:0, t:15, timer:null, phase:'id', idPts:0, idCorrect:false };
+const RG_TIME = 15;
+
+function renderRhythmGame(L){
+  RG.strips = L.strips;
+  RG.idx = 0;
+  document.getElementById('timerSlot').innerHTML='';
+  document.getElementById('playActions').innerHTML='';
+  rgStartStrip();
+}
+
+function rgStartStrip(){
+  const s = RG.strips[RG.idx];
+  RG.t = RG_TIME; RG.phase='id'; RG.idPts=0; RG.idCorrect=false;
+  // progress dots
+  const dots = document.getElementById('progDots');
+  dots.innerHTML = RG.strips.map((x,i)=>{
+    let c='dot'; if(i<RG.idx)c+=' done'; else if(i===RG.idx)c+=' active';
+    return `<span class="${c}"></span>`;
+  }).join('');
+  document.getElementById('sceneLabel').innerHTML = icon('activity') + ' 心律辨識 ' + (RG.idx+1) + ' / ' + RG.strips.length;
+  document.getElementById('ptLine').textContent = LEVELS[STATE.currentLevel].patient;
+
+  document.getElementById('timerSlot').innerHTML = `
+    <div class="timer-banner">
+      <div class="countdown" id="rgCd">${RG.t}</div>
+      <div>
+        <div style="font-weight:800;color:var(--bad);">監視器 ECG 警報 — 限時辨識</div>
+        <div style="font-size:13px;color:#f3c9c9;">${s.monitor}</div>
+      </div>
+    </div>`;
+
+  document.getElementById('qContainer').innerHTML = `
+    <div class="ecg" style="height:96px;margin-bottom:16px;">
+      <svg viewBox="0 0 320 96" preserveAspectRatio="none"><polyline id="rgLine" fill="none" stroke="var(--accent2)" stroke-width="1.8" points=""/></svg>
+    </div>
+    <div class="qbox" id="rgQbox">
+      <div class="qnum">問題 1 / 2 — 辨識心律</div>
+      <h3>${s.idQ}</h3>
+      <div class="hint">時間就是生命 — 越快答對得分越高。</div>
+      <div class="opts" id="rgOpts">
+        ${s.idOpts.map((o,i)=>`<button class="opt" data-i="${i}" onclick="rgAnswerId(${i})"><span class="k">${String.fromCharCode(65+i)}</span> ${o.t}</button>`).join('')}
+      </div>
+      <div id="rgFb"></div>
+    </div>`;
+  document.getElementById('playActions').innerHTML='';
+
+  drawRhythm(s.wave);
+  clearInterval(RG.timer);
+  RG.timer = setInterval(()=>{
+    RG.t--;
+    const cd=document.getElementById('rgCd');
+    if(cd) cd.textContent = RG.t;
+    if(RG.t<=0){ clearInterval(RG.timer); rgTimeout(); }
+  },1000);
+}
+
+function rgSpeedPts(base){
+  // 50% for being correct + up to 50% for speed remaining
+  return Math.round(base*0.5) + Math.round(base*0.5 * Math.max(0,RG.t)/RG_TIME);
+}
+
+function rgAnswerId(i){
+  const s = RG.strips[RG.idx];
+  document.querySelectorAll('#rgOpts .opt').forEach(b=>b.style.pointerEvents='none');
+  s.idOpts.forEach((o,idx)=>{
+    const btn=document.querySelector(`#rgOpts .opt[data-i="${idx}"]`);
+    if(o.correct) btn.classList.add('correct'); else if(idx===i) btn.classList.add('wrong');
+  });
+  RG.idCorrect = !!s.idOpts[i].correct;
+  RG.idPts = RG.idCorrect ? rgSpeedPts(10) : 0;
+  STATE.levelScore += RG.idPts;
+  if(!RG.idCorrect){
+    STATE.levelMistakes.push(`心律辨識 ${RG.idx+1}: 心律辨識錯誤（正解：${s.idOpts.find(o=>o.correct).t}）。`);
+    pushWrong(rhythmToWrong(s,'id'));
+  }
+  // move to action question (countdown continues)
+  RG.phase='act';
+  const box=document.getElementById('rgQbox');
+  box.insertAdjacentHTML('beforeend', `
+    <div style="border-top:1px solid var(--line);margin-top:14px;padding-top:14px;">
+      <div class="qnum">問題 2 / 2 — 第一步處置</div>
+      <h3 style="font-size:17px;margin:6px 0 4px;">${s.actQ}</h3>
+      <div class="opts" id="rgAct">
+        ${s.actOpts.map((o,idx)=>`<button class="opt" data-i="${idx}" onclick="rgAnswerAct(${idx})"><span class="k">${String.fromCharCode(65+idx)}</span> ${o.t}</button>`).join('')}
+      </div>
+    </div>`);
+}
+
+function rgAnswerAct(i){
+  const s = RG.strips[RG.idx];
+  clearInterval(RG.timer);
+  document.querySelectorAll('#rgAct .opt').forEach(b=>b.style.pointerEvents='none');
+  s.actOpts.forEach((o,idx)=>{
+    const btn=document.querySelector(`#rgAct .opt[data-i="${idx}"]`);
+    if(o.correct) btn.classList.add('correct'); else if(idx===i) btn.classList.add('wrong');
+  });
+  const actCorrect = !!s.actOpts[i].correct;
+  const actPts = actCorrect ? rgSpeedPts(10) : 0;
+  STATE.levelScore += actPts;
+  if(!actCorrect){
+    STATE.levelMistakes.push(`心律辨識 ${RG.idx+1}: 處置選擇錯誤（${s.idOpts.find(o=>o.correct).t}）。`);
+    pushWrong(rhythmToWrong(s,'act'));
+  }
+  rgFeedback(RG.idCorrect && actCorrect, RG.idPts+actPts);
+}
+
+function rgTimeout(){
+  const s = RG.strips[RG.idx];
+  // disable any active buttons
+  document.querySelectorAll('#rgOpts .opt, #rgAct .opt').forEach(b=>b.style.pointerEvents='none');
+  STATE.levelMistakes.push(`心律辨識 ${RG.idx+1}: 超時未完成（${s.idOpts.find(o=>o.correct).t}）。`);
+  if(RG.phase==='act'){ pushWrong(rhythmToWrong(s,'act')); }
+  else { pushWrong(rhythmToWrong(s,'id')); }
+  rgFeedback(false, RG.phase==='act'? RG.idPts : 0);
+}
+
+function rgFeedback(allCorrect, earned){
+  const s = RG.strips[RG.idx];
+  window.__ev = s.evidence;
+  const cls = allCorrect ? 'ok' : 'bad';
+  const msg = allCorrect ? s.fbOk : s.fbBad;
+  const slot = document.getElementById('rgFb');
+  slot.innerHTML = `<div class="feedback ${cls}" style="margin-top:14px;">${deico(msg)}
+      <div style="margin-top:8px;font-size:12.5px;color:var(--muted);">本條心律得分 ${earned} / 20</div>
+      <div><button class="evidence-btn" onclick='openModalEv()'>為什麼？ 證據 (Evidence) ${icon('arrow-right')}</button></div>
+    </div>`;
+  const last = RG.idx >= RG.strips.length-1;
+  document.getElementById('playActions').innerHTML =
+    `<button class="btn" onclick="rgNext()">${last?'完成關卡 '+icon('check'):'下一條心律 '+icon('arrow-right')}</button>`;
+}
+
+function rgNext(){
+  clearInterval(rgAnim); clearInterval(RG.timer);
+  RG.idx++;
+  if(RG.idx >= RG.strips.length){
+    document.getElementById('timerSlot').innerHTML='';
+    completeLevel();
+  } else {
+    rgStartStrip();
+  }
+}
+
+/* distinct animated waveforms per rhythm */
+function drawRhythm(type){
+  clearInterval(rgAnim);
+  const line = document.getElementById('rgLine');
+  if(!line) return;
+  let offset=0;
+  function frame(){
+    const pts=[]; const W=320,H=96, base=H*0.55;
+    for(let x=0;x<=W;x++){
+      const xo=x+offset; let y=base;
+      switch(type){
+        case 'vf':
+          y = base - (Math.sin(xo*0.9)*11 + Math.sin(xo*0.37)*8 + Math.sin(xo*1.73)*5 + (Math.random()*4-2));
+          break;
+        case 'pvt': {
+          const bw=28, p=(xo%bw)/bw;
+          y = base - Math.sin(p*Math.PI*2)*28;
+          break;
+        }
+        case 'asystole':
+          y = base + (Math.random()*1.4-0.7);
+          break;
+        case 'pea': {
+          const bw=78, p=(xo%bw)/bw;     // organized but low-amplitude, wide
+          if(p>0.12 && p<0.18) y=base-4;        // P
+          else if(p>=0.22 && p<0.30) y=base-15; // wide R (low amp)
+          else if(p>=0.30 && p<0.37) y=base+7;  // S
+          else if(p>0.50 && p<0.60) y=base-5;   // T
+          break;
+        }
+        case 'sinus': {
+          const bw=52, p=(xo%bw)/bw;     // normal P-QRS-T
+          if(p>0.10 && p<0.16) y=base-4;
+          else if(p>=0.18 && p<0.21) y=base+4;
+          else if(p>=0.21 && p<0.24) y=base-32;
+          else if(p>=0.24 && p<0.27) y=base+10;
+          else if(p>0.40 && p<0.50) y=base-7;
+          break;
+        }
+      }
+      pts.push(x+','+y.toFixed(1));
+    }
+    line.setAttribute('points', pts.join(' '));
+    offset += (type==='vf'?5 : type==='pvt'?4 : 3);
+  }
+  frame();
+  rgAnim = setInterval(frame, 60);
+}
+
+/* ============================================================
+   錯題收集 — record a wrong / under-credit question in serializable
+   MC form so it can be re-presented in the review screen.
+   Deduped by a stable key so the same question is only stored once.
+============================================================ */
+function pushWrong(rec){
+  if(!rec || !rec.opts || !rec.opts.some(o=>o.correct)) return;
+  const key = (rec.levelCode||'') + '|' + (rec.q||'') + '|' + rec.opts.map(o=>o.t).join('|');
+  if(STATE.wrongLog.some(w=>w.__key===key)) return;
+  rec.__key = key;
+  STATE.wrongLog.push(rec);
+}
+
+function renderStep(){
+  const L = LEVELS[STATE.currentLevel];
+  const step = L.steps[STATE.stepIndex];
+  // snapshot score at the start of a multi-case block (for per-case result judging)
+  if(step.caseHead) STATE.caseScoreAtStart = STATE.levelScore;
+  document.getElementById('timerSlot').innerHTML='';
+  // dots
+  const dots = document.getElementById('progDots');
+  dots.innerHTML = L.steps.map((s,i)=>{
+    let c='dot'; if(i<STATE.stepIndex)c+=' done'; else if(i===STATE.stepIndex)c+=' active';
+    return `<span class="${c}"></span>`;
+  }).join('');
+  document.getElementById('sceneLabel').textContent = step.scene;
+  document.getElementById('ptLine').textContent = L.patient;
+
+  const c = document.getElementById('qContainer');
+  const heading = step.scene.split('·').pop().trim();
+  if(step.type==='slider'){
+    c.innerHTML = `
+      <div class="qbox">
+        <div class="qnum">${step.label}</div>
+        <h3>${heading}</h3>
+        <div class="hint">${step.hint}</div>
+        <div class="slider-wrap">
+          <div class="slider-val"><span id="sv">${step.init}</span> <small>${step.unit}</small></div>
+          <input type="range" id="slider" min="${step.min}" max="${step.max}" step="${step.step}" value="${step.init}"
+            oninput="document.getElementById('sv').textContent=this.value">
+          <div class="scale"><span>${step.min}</span><span>${step.max}</span></div>
+        </div>
+        <div id="fbSlot"></div>
+      </div>`;
+    document.getElementById('playActions').innerHTML =
+      `<button class="btn" id="submitBtn" onclick="submitSlider()">確認決策 ${icon('check')}</button>`;
+  } else if(step.type==='info'){
+    c.innerHTML = `
+      <div class="qbox">
+        <div class="qnum">${step.label}</div>
+        <h3>${heading}</h3>
+        <div class="hint">${step.hint}</div>
+        ${step.body||''}
+        <div id="fbSlot"></div>
+      </div>`;
+    document.getElementById('playActions').innerHTML =
+      `<button class="btn" id="submitBtn" onclick="submitInfo()">了解，繼續 ${icon('arrow-right')}</button>`;
+  } else if(step.type==='multi'){
+    c.innerHTML = `
+      <div class="qbox">
+        <div class="qnum">${step.label}</div>
+        <h3>${heading}</h3>
+        <div class="hint">${step.hint}</div>
+        <div class="hint" style="color:var(--accent2);">（複選題 — 勾選所有正確處置後送出）</div>
+        <div class="opts" id="opts">
+          ${step.opts.map((o,i)=>`<button class="opt" data-i="${i}" onclick="toggleMulti(${i})"><span class="k">${o.k}</span> ${o.t}</button>`).join('')}
+        </div>
+        <div id="fbSlot"></div>
+      </div>`;
+    pickedOpts = [];
+    document.getElementById('playActions').innerHTML =
+      `<button class="btn" id="submitBtn" onclick="submitMulti()">送出 ${icon('check')}</button>`;
+  } else if(step.type==='result'){
+    // optional caseStart: judge this result only on the points of the current case (steps caseStart..stepIndex)
+    const sliceStart = (typeof step.caseStart==='number') ? step.caseStart : 0;
+    const beforeMax = L.steps.slice(sliceStart,STATE.stepIndex).reduce((a,s)=>a+s.pts,0);
+    const gotInRange = (typeof step.caseStart==='number') ? (STATE.levelScore - (STATE.caseScoreAtStart||0)) : STATE.levelScore;
+    const good = beforeMax>0 ? (gotInRange/beforeMax) >= (step.threshold||0.7) : true;
+    const branch = good ? step.good : step.bad;
+    const earned = good ? step.pts : 0;
+    STATE.levelScore += earned;
+    if(branch.vital) branch.vital();
+    if(!good) STATE.levelMistakes.push(`${step.label}: 因前述決策不足，結果惡化。`);
+    renderVitals(); drawECG();
+    logVitals(stepTimeLabel(step, '#'+(STATE.vitalsLog.length+1)));
+    c.innerHTML = `
+      <div class="qbox">
+        <div class="qnum">${step.label}</div>
+        <h3>${heading}</h3>
+        <div id="fbSlot"></div>
+      </div>`;
+    showFeedback(good?'ok':'bad', branch.fb, step.evidence, earned, step.pts);
+    advanceBtn();
+  } else {
+    const ml = step.multiCorrect ? '<div class="hint" style="color:var(--accent2);">（此題可能有多個正確答案，選擇最佳處置）</div>' : '';
+    c.innerHTML = `
+      <div class="qbox">
+        <div class="qnum">${step.label}</div>
+        <h3>${heading}</h3>
+        <div class="hint">${step.hint}</div>
+        ${step.body||''}
+        ${ml}
+        <div class="opts" id="opts">
+          ${step.opts.map((o,i)=>`<button class="opt" data-i="${i}" onclick="selectOpt(${i})"><span class="k">${o.k}</span> ${o.t}</button>`).join('')}
+        </div>
+        <div id="fbSlot"></div>
+      </div>`;
+    document.getElementById('playActions').innerHTML='';
+  }
+}
+
+function submitInfo(){
+  const step = LEVELS[STATE.currentLevel].steps[STATE.stepIndex];
+  STATE.levelScore += step.pts;
+  showFeedback('ok', step.fb, step.evidence, step.pts, step.pts);
+  const sb=document.getElementById('submitBtn'); if(sb) sb.disabled=true;
+  advanceBtn();
+}
+
+function toggleMulti(i){
+  const idx = pickedOpts.indexOf(i);
+  const btn = document.querySelector(`#opts .opt[data-i="${i}"]`);
+  if(idx>=0){ pickedOpts.splice(idx,1); btn.classList.remove('sel'); }
+  else { pickedOpts.push(i); btn.classList.add('sel'); }
+}
+
+function submitMulti(){
+  const step = LEVELS[STATE.currentLevel].steps[STATE.stepIndex];
+  document.querySelectorAll('#opts .opt').forEach(b=>b.style.pointerEvents='none');
+  const correctIdx = step.opts.map((o,i)=>o.correct?i:-1).filter(i=>i>=0);
+  let rightPicks=0, wrongPicks=0;
+  step.opts.forEach((o,i)=>{
+    const btn = document.querySelector(`#opts .opt[data-i="${i}"]`);
+    const picked = pickedOpts.includes(i);
+    if(o.correct){
+      btn.classList.add('correct');
+      if(picked) rightPicks++;
+    } else if(picked){
+      btn.classList.add('wrong'); wrongPicks++;
+    }
+  });
+  const totalCorrect = correctIdx.length;
+  // proportional: fraction of correct selected, penalised by wrong picks
+  let frac = (rightPicks - wrongPicks) / totalCorrect;
+  frac = Math.max(0, Math.min(1, frac));
+  const earned = Math.round(step.pts * frac);
+  STATE.levelScore += earned;
+  let grade, msg;
+  if(rightPicks===totalCorrect && wrongPicks===0){ grade='ok'; msg=step.fbOk; }
+  else if(wrongPicks>0 && rightPicks===0){ grade='bad'; msg=step.fbBad; }
+  else { grade='warn'; msg=step.fbPartial||step.fbBad; }
+  if(grade!=='ok'){ STATE.levelMistakes.push(`${step.label}: ${stripTag(msg)}`); pushWrong(multiStepToWrong(step)); }
+  document.getElementById('submitBtn').disabled = true;
+  showFeedback(grade, msg, step.evidence, earned, step.pts);
+  advanceBtn();
+}
+
+function submitSlider(){
+  const step = LEVELS[STATE.currentLevel].steps[STATE.stepIndex];
+  const v = parseFloat(document.getElementById('slider').value);
+  const grade = step.grade(v);
+  let earned = grade==='ok'?step.pts : grade==='warn'?Math.round(step.pts*0.4):0;
+  STATE.levelScore += earned;
+  if(grade!=='ok'){
+    STATE.levelMistakes.push(`${step.label}: 你選 ${v}${step.unit}。${stripTag(step.fb[grade])}`);
+    pushWrong(sliderToWrong(step));
+  }
+  if(step.applyVital) step.applyVital(v);
+  renderVitals(); drawECG();
+  logVitals(stepTimeLabel(step, '#'+(STATE.vitalsLog.length+1)));
+  showFeedback(grade, step.fb[grade], step.evidence, earned, step.pts);
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('slider').disabled = true;
+  advanceBtn();
+}
+
+let pickedOpts = [];
+function selectOpt(i){
+  const step = LEVELS[STATE.currentLevel].steps[STATE.stepIndex];
+  // single-shot evaluation per click; for multiCorrect, any single correct click counts
+  const opt = step.opts[i];
+  // disable all
+  document.querySelectorAll('#opts .opt').forEach(b=>b.style.pointerEvents='none');
+  // mark
+  step.opts.forEach((o,idx)=>{
+    const btn = document.querySelector(`#opts .opt[data-i="${idx}"]`);
+    if(o.correct) btn.classList.add('correct');
+    else if(idx===i) btn.classList.add('wrong');
+  });
+  let earned=0, grade;
+  if(opt.correct){ earned = step.pts; grade='ok'; if(opt.applyVital) opt.applyVital(); }
+  else { earned = 0; grade='bad'; STATE.levelMistakes.push(`${step.label}: 你選 ${opt.k}。${stripTag(opt.fb)}`); pushWrong(mcStepToWrong(step)); }
+  STATE.levelScore += earned;
+  renderVitals(); drawECG();
+  logVitals(stepTimeLabel(step, '#'+(STATE.vitalsLog.length+1)));
+  showFeedback(grade, opt.fb, step.evidence, earned, step.pts);
+  advanceBtn();
+}
+
+function showFeedback(grade, msg, evidence, earned, max){
+  const cls = grade==='ok'?'ok':grade==='warn'?'warn':'bad';
+  const slot = document.getElementById('fbSlot');
+  slot.innerHTML = `<div class="feedback ${cls}">${deico(msg)}
+      <div style="margin-top:8px;font-size:12.5px;color:var(--muted);">本題得分 ${earned} / ${max}</div>
+      <div><button class="evidence-btn" onclick='openModalEv()'>為什麼？ 證據 (Evidence) ${icon('arrow-right')}</button></div>
+    </div>`;
+  window.__ev = evidence;
+}
+function openModalEv(){ const e=window.__ev; openModal(e.title,e.body,e.cite); }
+
+function advanceBtn(){
+  const L = LEVELS[STATE.currentLevel];
+  const last = STATE.stepIndex >= L.steps.length-1;
+  document.getElementById('playActions').innerHTML =
+    `<button class="btn" onclick="nextStep()">${last?'完成關卡 '+icon('check'):'下一步 '+icon('arrow-right')}</button>`;
+}
+function nextStep(){
+  STATE.stepIndex++;
+  if(STATE.stepIndex >= LEVELS[STATE.currentLevel].steps.length){
+    completeLevel();
+  } else {
+    renderStep();
+  }
+}
+
+/* ============================================================
+   LEVEL COMPLETE
+============================================================ */
+function completeLevel(){
+  const L = LEVELS[STATE.currentLevel];
+  const prev = STATE.completed[L.code];
+  const max = STATE.levelMax + (L.hasTimer?10:0);
+  // add to total only the improvement-free way: record best
+  if(!prev){
+    STATE.totalScore += STATE.levelScore;
+  } else {
+    STATE.totalScore += (STATE.levelScore - prev.score); // adjust by delta if replayed
+  }
+  STATE.completed[L.code] = {score:STATE.levelScore, max:max};
+  // badge
+  if(!STATE.badges.find(b=>b.name===L.badge.name)){
+    STATE.badges.push(L.badge);
+  }
+  // unlock next
+  if(L.next) STATE.unlocked[L.next] = true;
+  // store mistakes
+  STATE.levelMistakes.forEach(m=>{ if(!STATE.mistakes.includes(m)) STATE.mistakes.push(m); });
+
+  // render done screen
+  document.getElementById('doneTitle').textContent = `關卡完成 — ${L.code} ${L.title}`;
+  document.getElementById('doneScore').textContent = STATE.levelScore;
+  document.getElementById('doneMax').textContent = max;
+  document.getElementById('doneBadge').innerHTML =
+    `<span class="b">${icon(L.badge.icon)}</span>獲得徽章：<b>${L.badge.name}</b>`;
+  const rev = document.getElementById('doneReview');
+  if(STATE.levelMistakes.length){
+    rev.innerHTML = `<h4>${icon('clipboard')} 可改進之處 Review</h4><ul>${STATE.levelMistakes.map(m=>`<li>${m}</li>`).join('')}</ul>`;
+  } else {
+    rev.innerHTML = `<h4>${icon('clipboard')} Review</h4><div style="color:var(--good);">完美！所有決策皆符合 2025 AHA 指引。</div>`;
+  }
+  const nb = document.getElementById('nextLevelBtn');
+  nb.innerHTML = L.next ? '下一關 '+icon('arrow-right') : '查看 72h 最終結果 '+icon('arrow-right');
+  go('done');
+  updateHUD();
+}
+function nextFromDone(){
+  const L = LEVELS[STATE.currentLevel];
+  if(L.next){ go('levels'); }
+  else { showFinal(); }
+}
+
+/* ============================================================
+   FINAL OUTCOME / CPC
+============================================================ */
+/* Shared CPC / percentage computation — single source of truth.
+   Used by BOTH showFinal() and the score report so they never disagree. */
+function computeOutcome(){
+  let totalMax=0, totalGot=0;
+  LEVEL_ORDER.forEach(c=>{
+    if(STATE.completed[c]){ totalGot+=STATE.completed[c].score; totalMax+=STATE.completed[c].max; }
+  });
+  const pct = totalMax? totalGot/totalMax : 0;
+  let cpc, grade, cls, msg, letter;
+  if(pct>=0.85){
+    cpc='CPC 1'; grade='好預後 · Good Recovery'; cls='cpc-1';
+    msg='病人神經學功能完全恢復，可獨立生活並重返工作。';
+    letter=`親愛的醫師：<br><br>謝謝您。我醒來時，家人就在床邊。護理師說，是您在那關鍵的 72 小時裡，把我的血壓、體溫、氧氣每一個數字都守得剛剛好。我現在能走路、能說話、能再次抱我的孫子。<br><br>您守住的不只是我的心跳，是我的整個人生。`;
+  } else if(pct>=0.6){
+    cpc='CPC 2'; grade='部分恢復 · Moderate Disability'; cls='cpc-2';
+    msg='病人存活並恢復意識，但留有中度神經學障礙，需復健支持。';
+    letter=`親愛的醫師：<br><br>我活下來了。雖然有些事情變得比較吃力，記性也不如從前，但我還在這裡。復健的路還很長，但每一天我都在進步。<br><br>謝謝您沒有放棄我。`;
+  } else {
+    cpc='CPC 3–5'; grade='不良預後 · Severe Disability / Poor Outcome'; cls='cpc-3';
+    msg='病人神經學預後不佳。部分早期決策若能更貼近指引，或許能改變結果。';
+    letter=`致醫療團隊：<br><br>謝謝你們的全力以赴。post-ROSC 的每一個細節 — 血壓、氧合、體溫、癲癇與冠脈再灌流 — 都環環相扣。回顧這次照護，有些決策還有精進空間。<br><br>願這次經驗，成為下一位病人的希望。`;
+  }
+  return {totalMax, totalGot, pct, cpc, grade, cls, msg, letter};
+}
+
+function showFinal(){
+  const O = computeOutcome();
+  const totalMax=O.totalMax, totalGot=O.totalGot, pct=O.pct;
+  const cpc=O.cpc, grade=O.grade, cls=O.cls, msg=O.msg, letter=O.letter;
+  document.getElementById('cpcSlot').innerHTML = `
+    <div class="cpc-card ${cls}">
+      <div class="label">NEUROLOGIC OUTCOME · 神經學預後</div>
+      <div class="grade">${cpc}</div>
+      <div style="font-size:16px;font-weight:700;">${grade}</div>
+      <div style="font-size:14px;color:var(--muted);margin-top:8px;">${msg}</div>
+      <div style="margin-top:14px;font-size:14px;">綜合得分 <b style="color:var(--accent);">${totalGot}</b> / ${totalMax} (${Math.round(pct*100)}%)　徽章 ${STATE.badges.map(b=>icon(b.icon)).join(' ')||'—'}</div>
+    </div>
+    ${buildRecoveryChart(pct, cpc)}
+    ${buildVitalsTrend()}`;
+  document.getElementById('letterSlot').innerHTML =
+    `${letter}<div class="sign">— 病人 / 家屬敬上</div>`;
+  const fr = document.getElementById('finalReview');
+  let badgeList = STATE.badges.length? `<div style="margin-bottom:10px;">${icon('medal','ico-warn')} 已獲徽章：${STATE.badges.map(b=>icon(b.icon)+' '+b.name).join('、')}</div>`:'';
+  let mistakes = STATE.mistakes.length
+    ? `<h4>${icon('clipboard')} 反思 — 可複習的決策 Mistakes to Review</h4><ul>${STATE.mistakes.map(m=>`<li>${m}</li>`).join('')}</ul>`
+    : `<h4>${icon('clipboard')} 反思</h4><div style="color:var(--good);">所有關卡決策皆符合 2025 AHA 指引，表現卓越！</div>`;
+  fr.innerHTML = badgeList + mistakes;
+  // tune the 錯題重練 button label to reflect whether there is anything to retry
+  const rmb = document.getElementById('reviewMistakesBtn');
+  if(rmb){
+    const n = (STATE.wrongLog||[]).length;
+    rmb.innerHTML = n
+      ? `錯題重練 / Review Mistakes (${n}) ${icon('clipboard')}`
+      : `錯題重練 / Review Mistakes ${icon('clipboard')}`;
+  }
+  go('final');
+}
+
+/* ============================================================
+   PRINTABLE SCORE REPORT / 成績單
+   Reuses computeOutcome() so CPC/百分比 matches showFinal exactly.
+============================================================ */
+function todayStr(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+day;
+}
+function renderReport(){
+  const O = computeOutcome();
+  const name = (STATE.learner.name||'').trim() || '未具名 / Anonymous';
+  const unit = (STATE.learner.unit||'').trim() || '—';
+  const dateStr = todayStr();
+  const pctInt = Math.round(O.pct*100);
+
+  // per-level rows
+  const rows = LEVEL_ORDER.map(code=>{
+    const L = LEVELS[code];
+    const done = STATE.completed[code];
+    if(done){
+      return `<tr>
+        <td>${code} · ${L.title}</td>
+        <td class="num">${done.score} / ${done.max}</td>
+        <td class="st-done">${icon('check','ico-ok')} 完成</td>
+      </tr>`;
+    }
+    return `<tr>
+      <td>${code} · ${L.title}</td>
+      <td class="num">— / —</td>
+      <td class="st-undone">未完成</td>
+    </tr>`;
+  }).join('');
+
+  // badges
+  const badgesHtml = STATE.badges.length
+    ? STATE.badges.map(b=>`<span class="rb">${icon(b.icon)} ${b.name}</span>`).join('')
+    : '<span class="rb" style="color:var(--muted);">尚未取得徽章</span>';
+
+  // performance-band evaluation sentence
+  let evalTxt;
+  if(O.pct>=0.85){
+    evalTxt='整體表現優異，post-ROSC 各環節（血壓、氧合、通氣、體溫、癲癇與冠脈再灌流）皆貼近 2025 AHA 指引，達成最佳神經學預後 (CPC 1)。建議持續維持並協助帶教。';
+  } else if(O.pct>=0.6){
+    evalTxt='整體表現良好，多數決策符合指引，但部分關鍵步驟仍有精進空間。建議針對得分較低的關卡複習，鞏固 post-ROSC 照護細節。';
+  } else if(O.totalMax>0){
+    evalTxt='部分早期關鍵決策與指引仍有落差，影響整體神經學預後。建議系統性複習文獻庫並重做相關關卡，強化 post-ROSC 照護流程。';
+  } else {
+    evalTxt='尚未完成任何關卡，無法評定成績。建議先完成主線關卡以產生完整成績單。';
+  }
+
+  document.getElementById('reportDoc').innerHTML = `
+    <div class="report-head">
+      <div class="report-mark">${icon('medal')}</div>
+      <div>
+        <h2>ACLS ROSC 後照護訓練 成績單</h2>
+        <div class="rsub">Post-Cardiac-Arrest Care Training · Score Report</div>
+      </div>
+    </div>
+
+    <div class="report-meta">
+      <div class="m"><div class="ml">學員姓名 / Name</div><div class="mv">${name}</div></div>
+      <div class="m"><div class="ml">單位 / 科別 Unit / Dept</div><div class="mv">${unit}</div></div>
+      <div class="m"><div class="ml">完成日期 / Date</div><div class="mv">${dateStr}</div></div>
+    </div>
+
+    <table class="report-table">
+      <thead>
+        <tr><th>關卡名稱 Level</th><th style="text-align:right;">得分 / 滿分 Score</th><th>狀態 Status</th></tr>
+      </thead>
+      <tbody>
+        ${rows}
+        <tr class="tot">
+          <td>總分 Total</td>
+          <td class="num">${O.totalGot} / ${O.totalMax}</td>
+          <td>${pctInt}%</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="report-cpc">
+      <div>
+        <div class="cpc-big">${O.cpc}</div>
+        <div class="cpc-meta">${O.grade}</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:22px;font-weight:800;">${pctInt}%</div>
+        <div class="cpc-meta">總分 ${O.totalGot} / ${O.totalMax}</div>
+      </div>
+    </div>
+
+    <div class="report-section-title">${icon('medal','ico-warn')} 取得徽章 Badges</div>
+    <div class="report-badges">${badgesHtml}</div>
+
+    <div class="report-section-title">${icon('clipboard')} 綜合評語 Evaluation</div>
+    <div class="report-eval">${evalTxt}</div>
+
+    <div class="report-foot">
+      <span>教育模擬用途，非正式認證。Educational simulation only — not formal certification.</span>
+      <span>${dateStr}</span>
+    </div>`;
+}
+
+/* ============================================================
+   FUNCTIONAL RECOVERY CURVE  (inline SVG line chart)
+============================================================ */
+function buildRecoveryChart(pct, cpc){
+  // trajectory endpoints depend on overall performance
+  let traj, lineColor, captionTxt;
+  if(pct>=0.85){
+    traj=[22,48,72,90]; lineColor='var(--good)';
+    captionTxt=`高水準的 post-ROSC 照護 -> 功能評分穩定爬升至約 90（對應 ${cpc}），病人可獨立生活。`;
+  } else if(pct>=0.6){
+    traj=[14,30,45,55]; lineColor='var(--warn)';
+    captionTxt=`中等表現 -> 功能緩步恢復至約 55（對應 ${cpc}），留有中度障礙、需復健支持。`;
+  } else {
+    traj=[8,12,16,20]; lineColor='var(--bad)';
+    captionTxt=`早期關鍵決策不足 -> 功能恢復停滯於約 20（對應 ${cpc}），預後不佳。`;
+  }
+  const W=460,H=270, mL=46,mR=18,mT=20,mB=46;
+  const pw=W-mL-mR, ph=H-mT-mB;
+  const xLabels=['ICU','1個月','3個月','6個月'];
+  const xs = traj.map((_,i)=> mL + (traj.length===1?0: i*pw/(traj.length-1)));
+  const yOf = v => mT + (1 - v/100)*ph;
+  // gridlines + y labels (0,25,50,75,100)
+  let grid='';
+  for(let g=0; g<=100; g+=25){
+    const y=yOf(g);
+    grid += `<line x1="${mL}" y1="${y.toFixed(1)}" x2="${(W-mR)}" y2="${y.toFixed(1)}" stroke="var(--line)" stroke-width="1" opacity="0.6"/>`;
+    grid += `<text x="${mL-8}" y="${(y+4).toFixed(1)}" text-anchor="end" font-size="11" fill="var(--muted)">${g}</text>`;
+  }
+  // x axis labels + vertical guides
+  let xaxis='';
+  xs.forEach((x,i)=>{
+    xaxis += `<line x1="${x.toFixed(1)}" y1="${mT}" x2="${x.toFixed(1)}" y2="${(H-mB)}" stroke="var(--line)" stroke-width="1" opacity="0.3"/>`;
+    xaxis += `<text x="${x.toFixed(1)}" y="${(H-mB+20)}" text-anchor="middle" font-size="12" fill="var(--muted)">${xLabels[i]}</text>`;
+  });
+  // polyline + points
+  const poly = traj.map((v,i)=>`${xs[i].toFixed(1)},${yOf(v).toFixed(1)}`).join(' ');
+  let pointsSvg='';
+  traj.forEach((v,i)=>{
+    const x=xs[i].toFixed(1), y=yOf(v).toFixed(1);
+    pointsSvg += `<circle cx="${x}" cy="${y}" r="4.5" fill="${lineColor}" stroke="var(--bg)" stroke-width="1.5"/>`;
+    pointsSvg += `<text x="${x}" y="${(parseFloat(y)-10).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="700" fill="${lineColor}">${v}</text>`;
+  });
+  return `
+    <div class="cpc-card" style="background:var(--panel2);border:1px solid var(--line);text-align:left;padding:20px 22px;">
+      <div class="label" style="text-align:center;">${icon('activity')} 功能恢復曲線 · FUNCTIONAL RECOVERY CURVE</div>
+      <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block;margin:10px 0 4px;" xmlns="http://www.w3.org/2000/svg">
+        <text x="14" y="${mT+ph/2}" transform="rotate(-90 14 ${mT+ph/2})" text-anchor="middle" font-size="11" fill="var(--muted)">功能評分 0–100</text>
+        ${grid}
+        ${xaxis}
+        <line x1="${mL}" y1="${mT}" x2="${mL}" y2="${(H-mB)}" stroke="var(--muted)" stroke-width="1.5"/>
+        <line x1="${mL}" y1="${(H-mB)}" x2="${(W-mR)}" y2="${(H-mB)}" stroke="var(--muted)" stroke-width="1.5"/>
+        <polyline fill="none" stroke="${lineColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="${poly}"/>
+        ${pointsSvg}
+      </svg>
+      <div style="font-size:13px;color:var(--muted);text-align:center;margin-top:6px;">${captionTxt}</div>
+    </div>`;
+}
+
+/* ============================================================
+   VITAL-SIGNS TREND  (inline SVG multi-line chart, 0–100 normalized)
+============================================================ */
+function buildVitalsTrend(){
+  const log = STATE.vitalsLog || [];
+  // graceful empty / too-short case
+  if(log.length < 2){
+    return `
+      <div class="cpc-card" style="background:var(--panel2);border:1px solid var(--line);text-align:left;padding:20px 22px;">
+        <div class="label" style="text-align:center;">${icon('activity')} 生命徵象趨勢 · VITAL SIGNS TREND</div>
+        <div style="font-size:13.5px;color:var(--muted);text-align:center;margin-top:12px;">
+          尚無足夠的生命徵象紀錄可繪製趨勢圖（至少需 2 個時間點）。<br>
+          完成更多主線關卡決策後，即可在此檢視 72 小時的趨勢變化。
+        </div>
+      </div>`;
+  }
+  // normalized ranges so all four lines share one 0–100 scale
+  const series = [
+    {key:'map',  name:'MAP',     unit:'mmHg', color:'var(--accent)',  lo:40, hi:120},
+    {key:'hr',   name:'HR',      unit:'bpm',  color:'var(--accent2)', lo:40, hi:160},
+    {key:'temp', name:'體溫 Temp',unit:'°C',   color:'var(--warn)',    lo:32, hi:39},
+    {key:'spo2', name:'SpO₂',    unit:'%',    color:'var(--good)',    lo:80, hi:100},
+  ];
+  const norm = (val,s)=> Math.max(0, Math.min(100, (val - s.lo)/(s.hi - s.lo)*100));
+
+  const W=480,H=300, mL=42,mR=16,mT=18,mB=58;
+  const pw=W-mL-mR, ph=H-mT-mB;
+  const n = log.length;
+  const xs = log.map((_,i)=> mL + (n===1?0 : i*pw/(n-1)));
+  const yOf = nv => mT + (1 - nv/100)*ph;
+
+  // gridlines + y labels (0..100 normalized)
+  let grid='';
+  for(let g=0; g<=100; g+=25){
+    const y=yOf(g);
+    grid += `<line x1="${mL}" y1="${y.toFixed(1)}" x2="${(W-mR)}" y2="${y.toFixed(1)}" stroke="var(--line)" stroke-width="1" opacity="0.5"/>`;
+    grid += `<text x="${mL-7}" y="${(y+4).toFixed(1)}" text-anchor="end" font-size="10" fill="var(--muted)">${g}</text>`;
+  }
+  // shaded normal-range bands: MAP>=65 (normalized on MAP scale) & SpO2 92-98 (normalized on SpO2 scale)
+  const mapS = series[0], spo2S = series[3];
+  const mapBandLo = yOf(norm(65, mapS));         // MAP >=65 healthy
+  const spo2BandHi = yOf(norm(98, spo2S));
+  const spo2BandLo = yOf(norm(92, spo2S));
+  let bands = '';
+  bands += `<rect x="${mL}" y="${mT}" width="${pw}" height="${(mapBandLo-mT).toFixed(1)}" fill="var(--accent)" opacity="0.06"/>`;
+  bands += `<rect x="${mL}" y="${spo2BandHi.toFixed(1)}" width="${pw}" height="${(spo2BandLo-spo2BandHi).toFixed(1)}" fill="var(--good)" opacity="0.08"/>`;
+
+  // x axis labels + vertical guides
+  let xaxis='';
+  xs.forEach((x,i)=>{
+    xaxis += `<line x1="${x.toFixed(1)}" y1="${mT}" x2="${x.toFixed(1)}" y2="${(H-mB)}" stroke="var(--line)" stroke-width="1" opacity="0.25"/>`;
+    xaxis += `<text x="${x.toFixed(1)}" y="${(H-mB+16)}" text-anchor="middle" font-size="10" fill="var(--muted)">${String(log[i].t)}</text>`;
+  });
+
+  // one polyline + markers per series
+  let lines='';
+  series.forEach(s=>{
+    const poly = log.map((e,i)=>`${xs[i].toFixed(1)},${yOf(norm(e[s.key],s)).toFixed(1)}`).join(' ');
+    lines += `<polyline fill="none" stroke="${s.color}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" points="${poly}"/>`;
+    log.forEach((e,i)=>{
+      lines += `<circle cx="${xs[i].toFixed(1)}" cy="${yOf(norm(e[s.key],s)).toFixed(1)}" r="3.2" fill="${s.color}" stroke="var(--bg)" stroke-width="1.2"/>`;
+    });
+  });
+
+  // legend (SVG swatch line + real-unit range)
+  let legend='';
+  const lgY = H-mB+34, lgGap = 118;
+  series.forEach((s,i)=>{
+    const lx = mL + (i%2)*((pw)/2);
+    const ly = lgY + Math.floor(i/2)*16;
+    legend += `<line x1="${lx}" y1="${ly-4}" x2="${lx+16}" y2="${ly-4}" stroke="${s.color}" stroke-width="3" stroke-linecap="round"/>`;
+    legend += `<text x="${lx+22}" y="${ly}" font-size="10.5" fill="var(--muted)">${s.name} (${s.lo}–${s.hi}${s.unit})</text>`;
+  });
+
+  return `
+    <div class="cpc-card" style="background:var(--panel2);border:1px solid var(--line);text-align:left;padding:20px 22px;">
+      <div class="label" style="text-align:center;">${icon('activity')} 生命徵象趨勢 · VITAL SIGNS TREND</div>
+      <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block;margin:10px 0 4px;" xmlns="http://www.w3.org/2000/svg">
+        <text x="13" y="${(mT+ph/2).toFixed(1)}" transform="rotate(-90 13 ${(mT+ph/2).toFixed(1)})" text-anchor="middle" font-size="10" fill="var(--muted)">標準化刻度 0–100 (normalized)</text>
+        ${bands}
+        ${grid}
+        ${xaxis}
+        <line x1="${mL}" y1="${mT}" x2="${mL}" y2="${(H-mB)}" stroke="var(--muted)" stroke-width="1.5"/>
+        <line x1="${mL}" y1="${(H-mB)}" x2="${(W-mR)}" y2="${(H-mB)}" stroke="var(--muted)" stroke-width="1.5"/>
+        ${lines}
+        ${legend}
+      </svg>
+      <div style="font-size:12.5px;color:var(--muted);text-align:center;margin-top:6px;">
+        四條曲線以各自實際範圍標準化至 0–100 同框比較（圖例標示真實單位範圍）。淺色帶為正常區間：MAP ≥ 65 mmHg、SpO₂ 92–98%。
+      </div>
+    </div>`;
+}
+
+/* ============================================================
+   VITALS TIME-SERIES RECORDER  (in-memory only)
+============================================================ */
+function logVitals(label){
+  const v = STATE.vitals;
+  const entry = {
+    t: label || ('#'+(STATE.vitalsLog.length+1)),
+    map: Math.round(v.map),
+    hr: Math.round(v.hr),
+    temp: Math.round(v.temp*10)/10,
+    spo2: Math.round(v.spo2)
+  };
+  // skip duplicate consecutive snapshots (same label + identical values)
+  const last = STATE.vitalsLog[STATE.vitalsLog.length-1];
+  if(last && last.t===entry.t && last.map===entry.map && last.hr===entry.hr
+     && last.temp===entry.temp && last.spo2===entry.spo2){
+    return;
+  }
+  STATE.vitalsLog.push(entry);
+}
+/* derive a timeline label (0h / 6h / ...) from a step's scene string, else fallback */
+function stepTimeLabel(step, fallback){
+  if(step && step.scene){
+    const m = step.scene.match(/(\d+\s*[–-]?\s*\d*\s*h)/i);
+    if(m) return m[1].replace(/\s+/g,'');
+  }
+  return fallback;
+}
+
+/* ============================================================
+   VITALS RENDERING
+============================================================ */
+function vitalConfig(){
+  return {
+    map:{label:'map', val:STATE.vitals.map, min:40,max:110, ok:[80,100], warn:[65,80]},
+    hr:{label:'hr', val:STATE.vitals.hr, min:40,max:200, ok:[60,100], warn:[100,130]},
+    temp:{label:'temp', val:STATE.vitals.temp, min:31,max:40, ok:[32,37.5], warn:[37.5,38.5]},
+    spo2:{label:'spo2', val:STATE.vitals.spo2, min:80,max:100, ok:[92,98], warn:[98,100]},
+    rass:{label:'rass', val:STATE.vitals.rass, min:-5,max:2, ok:[-4,-2], warn:[-2,0]},
+  };
+}
+function renderVitals(){
+  const cfg = vitalConfig();
+  for(const key in cfg){
+    const c = cfg[key];
+    const pct = Math.max(0,Math.min(100, (c.val-c.min)/(c.max-c.min)*100));
+    const bar = document.getElementById('b-'+key);
+    const valEl = document.getElementById('v-'+key);
+    // status
+    let status='bad';
+    if(c.val>=c.ok[0] && c.val<=c.ok[1]) status='ok';
+    else if(c.val>=c.warn[0] && c.val<=c.warn[1]) status='warn';
+    // temp special: fever bad
+    let color = status==='ok'?'var(--good)':status==='warn'?'var(--warn)':'var(--bad)';
+    bar.style.width = pct+'%';
+    bar.style.background = color;
+    let mark = status==='ok' ? icon('check') : icon('warn');
+    let dispVal = (key==='temp')? c.val.toFixed(1) : (key==='rass'? (c.val>0?'+'+c.val:c.val) : Math.round(c.val));
+    valEl.innerHTML = `${dispVal} <span class="stat-${status}">${mark}</span>`;
+    valEl.className = 'val stat-'+status;
+  }
+}
+
+/* ECG waveform */
+let ecgTimer=null;
+function drawECG(critical){
+  clearInterval(ecgTimer);
+  const line = document.getElementById('ecgLine');
+  if(!line) return;
+  let offset=0;
+  function frame(){
+    const pts=[];
+    const W=300,H=54, base=H*0.6;
+    const beatW = critical? 18 : 40;     // tighter = faster (tachy)
+    for(let x=0;x<=W;x++){
+      const p = ((x+offset)%beatW)/beatW;
+      let y=base;
+      if(critical){
+        // chaotic VT/VF-like
+        y = base - (Math.sin((x+offset)*0.9)*8 + Math.sin((x+offset)*0.37)*6 + (Math.random()*4-2));
+      } else {
+        if(p>0.10 && p<0.16) y=base-3;        // P
+        else if(p>=0.18 && p<0.21) y=base+4;  // Q
+        else if(p>=0.21 && p<0.24) y=base-22; // R
+        else if(p>=0.24 && p<0.27) y=base+8;  // S
+        else if(p>0.40 && p<0.50) y=base-6;   // T
+      }
+      pts.push(x+','+y.toFixed(1));
+    }
+    line.setAttribute('points', pts.join(' '));
+    line.setAttribute('stroke', critical? 'var(--bad)':'var(--accent)');
+    offset += critical? 5 : 3;
+  }
+  frame();
+  ecgTimer = setInterval(frame, 60);
+}
+
+/* ============================================================
+   MODAL
+============================================================ */
+function openModal(title,body,cite){
+  document.getElementById('modalTitle').innerHTML = icon('bulb','ico-bulb') + ' ' + title;
+  document.getElementById('modalBody').innerHTML = body;
+  document.getElementById('modalCite').innerHTML = icon('book') + ' ' + cite;
+  document.getElementById('overlay').classList.add('show');
+}
+function closeModal(){ document.getElementById('overlay').classList.remove('show'); }
+document.getElementById('overlay').addEventListener('click',e=>{ if(e.target.id==='overlay') closeModal(); });
+
+/* ============================================================
+   UTIL
+============================================================ */
+function stripTag(s){ return s.replace(/\[\[(?:ok|warn|bad)\]\]\s*/g,'').trim(); }
+function restart(){
+  STATE.totalScore=0; STATE.badges=[]; STATE.completed={}; STATE.mistakes=[];
+  STATE.vitalsLog=[]; STATE.wrongLog=[];
+  STATE.unlocked={'L0-1':true,'L1-1':true,'L1-2':false,'L2-1':false,'L2-2':false,'L2-3':false,'L3-1':false};
+  // keep learner identity so a replay keeps the same name; re-sync inputs
+  const ni=document.getElementById('inpName'); if(ni) ni.value=STATE.learner.name||'';
+  const ui=document.getElementById('inpUnit'); if(ui) ui.value=STATE.learner.unit||'';
+  go('start'); updateHUD();
+}
+
+/* ============================================================
+   REFERENCE LIBRARY  (real references)
+============================================================ */
+const REFERENCES = [
+  {
+    tag:'2025 AHA Guidelines · Part 11',
+    title:'2025 AHA Guidelines for CPR & ECC — Part 11: Post-Cardiac Arrest Care',
+    authors:'Hirsch KG, Amorim E, Coppler PJ, et al.',
+    source:'Circulation. 2025;152(16_suppl_2):S673-S718.',
+    doi:'10.1161/CIR.0000000000001375',
+    take:'ROSC 後照護總綱：血壓、氧合/通氣、體溫控制、癲癇、冠脈評估與神經預後判定的整合架構。',
+  },
+  {
+    tag:'2025 AHA Guidelines · Executive Summary',
+    title:'2025 AHA Guidelines for CPR & ECC — Executive Summary',
+    authors:'Del Rios M, Bartos JA, Panchal AR, et al.',
+    source:'Circulation. 2025;152(16_suppl_2):S284-S312.',
+    doi:'10.1161/CIR.0000000000001372',
+    take:'2025 指引重點摘要：彙整復甦與 post-arrest 照護各主題的關鍵建議與更新。',
+  },
+  {
+    tag:'TTM2 Trial · NEJM 2021',
+    title:'TTM2 — Hypothermia versus Normothermia after Out-of-Hospital Cardiac Arrest',
+    authors:'Dankiewicz J, Cronberg T, Lilja G, et al.',
+    source:'N Engl J Med. 2021;384:2283-2294.',
+    doi:'10.1056/NEJMoa2100591',
+    take:'33°C 與正常體溫 (≤37.5°C) 在死亡率與神經預後無顯著差異；兩組皆積極避免發燒。',
+  },
+  {
+    tag:'BOX Trial · NEJM 2022',
+    title:'BOX — Blood-Pressure Targets in Comatose Survivors of Cardiac Arrest',
+    authors:'Kjaergaard J, Moller JE, Schmidt H, et al.',
+    source:'N Engl J Med. 2022;387:1456-1466.',
+    doi:'10.1056/NEJMoa2208687',
+    take:'較高 MAP 目標 (77 vs 63 mmHg) 未顯著改善死亡或不良神經預後。',
+  },
+  {
+    tag:'Review · Am J Emerg Med 2025',
+    title:'Emergency Medicine Updates: Managing the Patient With Return of Spontaneous Circulation',
+    authors:'Long B, Gottlieb M.',
+    source:'Am J Emerg Med. 2025;93:26-36.',
+    doi:'10.1016/j.ajem.2025.03.039',
+    take:'ROSC 後急診管理實務回顧：氣道/呼吸、血流動力學、再灌流與目標體溫的整合策略。',
+  },
+];
+function renderRefs(){
+  const list = document.getElementById('refList');
+  list.innerHTML = REFERENCES.map(r=>`
+    <div class="ref-card">
+      <div class="rtag">${icon('book')} ${r.tag}</div>
+      <div class="rtitle">${r.title}</div>
+      <div class="rmeta">${r.authors}<br>${r.source}</div>
+      <div class="rtake">${icon('bulb','ico-bulb')}<span>${r.take}</span></div>
+      <a class="doi" href="https://doi.org/${r.doi}" target="_blank" rel="noopener">${icon('arrow-right')} doi.org/${r.doi}</a>
+    </div>`).join('');
+}
+
+/* ============================================================
+   RAPID RANDOM CHALLENGE  (isolated state, no localStorage,
+   does NOT touch campaign STATE/unlocks)
+============================================================ */
+const RAPID = {
+  pool:[], queue:[], idx:0, score:0, max:0, correct:0,
+  t:0, perQ:20, n:8, timer:null, startMs:0, answered:false,
+  best:null,   // {correct,max,score,secs} — in-memory best this session
+};
+
+/* Build a pool of eligible decision questions from existing LEVELS.
+   Reuses existing clinical content — does not rewrite it. */
+function buildRapidPool(){
+  const pool=[];
+  for(const code in LEVELS){
+    const L = LEVELS[code];
+    // rhythm-mode levels: use the id question of each strip
+    if(L.strips){
+      L.strips.forEach((s,i)=>{
+        pool.push({
+          kind:'mc', src:code+' ['+(i+1)+']',
+          q:s.idQ,
+          opts:s.idOpts.map(o=>({t:o.t,correct:!!o.correct})),
+          evidence:s.evidence,
+        });
+      });
+    }
+    if(!L.steps) continue;
+    L.steps.forEach(step=>{
+      if(step.type==='mc'){
+        // single-correct or multiCorrect mc with >=1 correct option
+        if(!step.opts) return;
+        pool.push({
+          kind:'mc', src:code,
+          q:step.scene.split('·').pop().trim()+' — '+(step.label||''),
+          opts:step.opts.map(o=>({t:o.t,correct:!!o.correct})),
+          evidence:step.evidence,
+        });
+      } else if(step.type==='slider'){
+        // turn slider into a quick mc using its grade() to find a good vs poor value
+        const good = findSliderValue(step,'ok');
+        const bad = findSliderValue(step,'bad') ?? findSliderValue(step,'warn');
+        if(good==null || bad==null) return;
+        const opts=[{t:good+' '+step.unit,correct:true},{t:bad+' '+step.unit,correct:false}];
+        // add one more distractor at min or max
+        const extra = (bad===step.min)?step.max:step.min;
+        if(step.grade(extra)!=='ok') opts.push({t:extra+' '+step.unit,correct:false});
+        shuffle(opts);
+        pool.push({
+          kind:'mc', src:code,
+          q:(step.label||step.scene)+'：'+step.hint,
+          opts, evidence:step.evidence,
+        });
+      }
+    });
+  }
+  return pool;
+}
+function findSliderValue(step, want){
+  for(let v=step.min; v<=step.max; v+=(step.step||1)){
+    const r=Math.round(v*100)/100;
+    if(step.grade(r)===want) return r;
+  }
+  return null;
+}
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+function startRapid(){
+  RAPID.pool = buildRapidPool();
+  shuffle(RAPID.pool);
+  RAPID.queue = RAPID.pool.slice(0, Math.min(RAPID.n, RAPID.pool.length));
+  RAPID.idx = 0; RAPID.score = 0; RAPID.correct = 0; RAPID.answered=false;
+  RAPID.max = RAPID.queue.length * 10;
+  RAPID.startMs = Date.now();
+  go('rapid');
+  rapidRenderQ();
+}
+
+function rapidRenderQ(){
+  clearInterval(RAPID.timer);
+  RAPID.answered = false;
+  const q = RAPID.queue[RAPID.idx];
+  // shuffle option order for variety
+  const opts = shuffle(q.opts.map((o,i)=>({...o,oi:i})));
+  document.getElementById('rapidTitle').textContent = '隨機快速挑戰 Rapid Challenge';
+  document.getElementById('rapidSub').textContent = '第 '+(RAPID.idx+1)+' / '+RAPID.queue.length+' 題 — 限時 '+RAPID.perQ+' 秒。';
+  document.getElementById('rapidStat').innerHTML =
+    `<div class="chip">題目 <b>${RAPID.idx+1}/${RAPID.queue.length}</b></div>
+     <div class="chip">得分 <b>${RAPID.score}</b></div>
+     <div class="chip">答對 <b>${RAPID.correct}</b></div>`;
+  RAPID.t = RAPID.perQ;
+  document.getElementById('rapidTimerSlot').innerHTML = `
+    <div class="timer-banner">
+      <div class="countdown" id="rapidCd">${RAPID.t}</div>
+      <div>
+        <div style="font-weight:800;color:var(--bad);">限時作答 — 越快答對得分越高</div>
+        <div style="font-size:13px;color:#f3c9c9;">題庫來源：${q.src}</div>
+      </div>
+    </div>`;
+  document.getElementById('rapidContainer').innerHTML = `
+    <div class="qbox" style="margin-top:0;">
+      <div class="qnum">隨機題 Rapid</div>
+      <h3>${q.q}</h3>
+      <div class="opts" id="rapidOpts">
+        ${opts.map((o,i)=>`<button class="opt" data-i="${i}" data-c="${o.correct?1:0}" onclick="rapidAnswer(${i},${o.correct?1:0})"><span class="k">${String.fromCharCode(65+i)}</span> ${o.t}</button>`).join('')}
+      </div>
+      <div id="rapidFb"></div>
+    </div>`;
+  document.getElementById('rapidActions').innerHTML =
+    `<button class="btn secondary" onclick="go('start')">${icon('arrow-left')} 結束並回首頁</button>`;
+  RAPID.timer = setInterval(()=>{
+    RAPID.t--;
+    const cd=document.getElementById('rapidCd');
+    if(cd) cd.textContent = RAPID.t;
+    if(RAPID.t<=0){ clearInterval(RAPID.timer); rapidAnswer(-1,0,true); }
+  },1000);
+}
+
+function rapidSpeedPts(){
+  // 5 for correct + up to 5 for speed remaining
+  return 5 + Math.round(5 * Math.max(0,RAPID.t)/RAPID.perQ);
+}
+
+function rapidAnswer(i, isCorrect, timedOut){
+  if(RAPID.answered) return;
+  RAPID.answered = true;
+  clearInterval(RAPID.timer);
+  const q = RAPID.queue[RAPID.idx];
+  document.querySelectorAll('#rapidOpts .opt').forEach(b=>{
+    b.style.pointerEvents='none';
+    if(b.getAttribute('data-c')==='1') b.classList.add('correct');
+    else if(parseInt(b.getAttribute('data-i'),10)===i) b.classList.add('wrong');
+  });
+  let earned=0, cls='bad', msg;
+  if(timedOut){
+    msg='[[bad]]超時未作答。';
+  } else if(isCorrect){
+    earned = rapidSpeedPts(); cls='ok'; RAPID.correct++;
+    msg='[[ok]]答對！+'+earned+' 分。';
+  } else {
+    msg='[[bad]]答錯。';
+  }
+  RAPID.score += earned;
+  window.__ev = q.evidence;
+  const last = RAPID.idx >= RAPID.queue.length-1;
+  document.getElementById('rapidFb').innerHTML = `
+    <div class="feedback ${cls}" style="margin-top:14px;">${deico(msg)}
+      ${q.evidence?`<div><button class="evidence-btn" onclick='openModalEv()'>為什麼？ 證據 (Evidence) ${icon('arrow-right')}</button></div>`:''}
+    </div>`;
+  document.getElementById('rapidActions').innerHTML =
+    `<button class="btn" onclick="rapidNext()">${last?'看結果 '+icon('check'):'下一題 '+icon('arrow-right')}</button>`;
+}
+
+function rapidNext(){
+  RAPID.idx++;
+  if(RAPID.idx >= RAPID.queue.length){ rapidFinish(); }
+  else { rapidRenderQ(); }
+}
+
+function rapidFinish(){
+  clearInterval(RAPID.timer);
+  const secs = Math.round((Date.now()-RAPID.startMs)/1000);
+  // update in-memory best this session (higher score wins; tie -> faster)
+  const run = {correct:RAPID.correct, max:RAPID.queue.length, score:RAPID.score, secs:secs};
+  let isNewBest=false;
+  if(!RAPID.best || run.score>RAPID.best.score || (run.score===RAPID.best.score && run.secs<RAPID.best.secs)){
+    RAPID.best = run; isNewBest=true;
+  }
+  const mm = String(Math.floor(secs/60)).padStart(2,'0');
+  const ss = String(secs%60).padStart(2,'0');
+  const b = RAPID.best;
+  document.getElementById('rapidTitle').textContent = '快速挑戰結果 Rapid Result';
+  document.getElementById('rapidSub').textContent = isNewBest ? '本次刷新本場最佳成績！' : '完成本回合。';
+  document.getElementById('rapidStat').innerHTML='';
+  document.getElementById('rapidTimerSlot').innerHTML='';
+  document.getElementById('rapidContainer').innerHTML = `
+    <div class="rapid-result">
+      <div class="scorebig">${RAPID.score} <small style="font-size:20px;color:var(--muted);">/ ${RAPID.max}</small></div>
+      <div style="text-align:center;color:var(--muted);font-size:13px;">本次得分 Score</div>
+      <div class="rapid-grid">
+        <div class="cell"><div class="n">${RAPID.correct}/${RAPID.queue.length}</div><div class="l">正確題數 Correct</div></div>
+        <div class="cell"><div class="n">${RAPID.score}</div><div class="l">得分 Score</div></div>
+        <div class="cell"><div class="n">${mm}:${ss}</div><div class="l">用時 Time</div></div>
+      </div>
+      <div class="review">
+        <h4>${icon('trophy','ico-warn')} 本次最佳 / Best this session</h4>
+        <div style="color:var(--muted);">答對 <b style="color:var(--accent);">${b.correct}/${b.max}</b>　得分 <b style="color:var(--accent);">${b.score}</b>　用時 <b style="color:var(--accent);">${String(Math.floor(b.secs/60)).padStart(2,'0')}:${String(b.secs%60).padStart(2,'0')}</b>${isNewBest?'　'+icon('star-filled','ico-warn')+' 新紀錄':''}</div>
+        <div style="font-size:11.5px;color:var(--muted);margin-top:8px;">本模式分數獨立計算，不影響主線關卡解鎖與總分。</div>
+      </div>
+    </div>`;
+  document.getElementById('rapidActions').innerHTML = `
+    <button class="btn secondary" onclick="go('start')">回首頁 ${icon('arrow-right')}</button>
+    <button class="btn" onclick="startRapid()">再來一次 ${icon('refresh')}</button>`;
+}
+
+/* ============================================================
+   錯題重練 / MISTAKE REVIEW  (isolated REVIEW state, practice-only —
+   does NOT touch campaign STATE, score, badges, unlocks, vitalsLog,
+   or computeOutcome(). No localStorage.)
+============================================================ */
+
+/* ---- converters: build a serializable MC-style record from each step type ---- */
+function mcStepToWrong(step){
+  return {
+    levelCode: STATE.currentLevel,
+    levelTitle: LEVELS[STATE.currentLevel] ? LEVELS[STATE.currentLevel].title : '',
+    kind: 'mc',
+    q: step.scene.split('·').pop().trim() + ' — ' + (step.label||''),
+    opts: step.opts.map(o=>({t:o.t, correct:!!o.correct})),
+    evidence: step.evidence,
+  };
+}
+function multiStepToWrong(step){
+  return {
+    levelCode: STATE.currentLevel,
+    levelTitle: LEVELS[STATE.currentLevel] ? LEVELS[STATE.currentLevel].title : '',
+    kind: 'multi',
+    q: step.scene.split('·').pop().trim() + ' — ' + (step.label||''),
+    opts: step.opts.map(o=>({t:o.t, correct:!!o.correct})),
+    evidence: step.evidence,
+    fbOk: step.fbOk, fbPartial: step.fbPartial, fbBad: step.fbBad,
+  };
+}
+function sliderToWrong(step){
+  // re-present the slider decision as a quick MC (good vs poor values),
+  // reusing the step's own grade() — same approach as the rapid pool.
+  const good = findSliderValue(step,'ok');
+  let bad = findSliderValue(step,'bad'); if(bad==null) bad = findSliderValue(step,'warn');
+  if(good==null || bad==null) return null;
+  const opts=[{t:good+' '+step.unit,correct:true},{t:bad+' '+step.unit,correct:false}];
+  const extra = (bad===step.min)?step.max:step.min;
+  if(step.grade(extra)!=='ok') opts.push({t:extra+' '+step.unit,correct:false});
+  shuffle(opts);
+  return {
+    levelCode: STATE.currentLevel,
+    levelTitle: LEVELS[STATE.currentLevel] ? LEVELS[STATE.currentLevel].title : '',
+    kind: 'mc',
+    q: (step.label||step.scene)+'：'+step.hint,
+    opts, evidence: step.evidence,
+  };
+}
+function rhythmToWrong(strip, which){
+  const L = LEVELS[STATE.currentLevel] || {};
+  const src = (which==='act') ? {q:strip.actQ, opts:strip.actOpts} : {q:strip.idQ, opts:strip.idOpts};
+  return {
+    levelCode: STATE.currentLevel,
+    levelTitle: L.title || '心律辨識',
+    kind: 'mc',
+    monitor: strip.monitor,
+    q: (which==='act'?'處置 — ':'辨識 — ') + src.q,
+    opts: src.opts.map(o=>({t:o.t, correct:!!o.correct})),
+    evidence: strip.evidence,
+  };
+}
+
+const REVIEW = {
+  queue:[], idx:0, correct:0, total:0, answered:false, timer:null,
+};
+
+function startReview(){
+  if(!STATE.wrongLog || STATE.wrongLog.length===0){
+    REVIEW.queue=[]; REVIEW.idx=0; REVIEW.correct=0; REVIEW.total=0;
+    go('review');
+    reviewEmpty();
+    return;
+  }
+  // snapshot a fresh copy of the wrong set so re-runs are stable & isolated
+  REVIEW.queue = STATE.wrongLog.map(w=>w);
+  REVIEW.idx = 0; REVIEW.correct = 0; REVIEW.total = REVIEW.queue.length; REVIEW.answered=false;
+  go('review');
+  reviewRenderQ();
+}
+
+function reviewEmpty(){
+  document.getElementById('reviewTitle').textContent = '錯題重練 Mistake Review';
+  document.getElementById('reviewSub').textContent = '練習模式 — 不影響主線分數與徽章。';
+  document.getElementById('reviewStat').innerHTML='';
+  document.getElementById('reviewContainer').innerHTML = `
+    <div class="feedback ok" style="margin-top:6px;">
+      ${icon('check','ico-ok')} 本次無錯題，表現優異！所有決策皆符合 2025 AHA 指引，無需重練。
+    </div>`;
+  document.getElementById('reviewActions').innerHTML =
+    `<button class="btn secondary" onclick="showFinal()">${icon('arrow-left')} 回最終結果</button>
+     <button class="btn secondary" onclick="go('start')">回首頁 ${icon('arrow-right')}</button>`;
+}
+
+function reviewRenderQ(){
+  REVIEW.answered = false;
+  const q = REVIEW.queue[REVIEW.idx];
+  document.getElementById('reviewTitle').textContent = '錯題重練 Mistake Review';
+  document.getElementById('reviewSub').textContent =
+    '第 '+(REVIEW.idx+1)+' / '+REVIEW.queue.length+' 題 — 練習模式，不計入主線分數。';
+  document.getElementById('reviewStat').innerHTML =
+    `<div class="chip">題目 <b>${REVIEW.idx+1}/${REVIEW.queue.length}</b></div>
+     <div class="chip">本次答對 <b>${REVIEW.correct}</b></div>
+     <div class="chip">來源 <b>${q.levelCode||'—'}</b></div>`;
+
+  const monitorHtml = q.monitor
+    ? `<div class="hint" style="color:var(--accent2);">${icon('activity')} 監視器：${q.monitor}</div>` : '';
+  const isMulti = (q.kind==='multi');
+  const multiHint = isMulti
+    ? '<div class="hint" style="color:var(--accent2);">（複選題 — 勾選所有正確處置後送出）</div>' : '';
+  // present options in a fixed (non-shuffled) order; correctness comes from each opt
+  const optsHtml = q.opts.map((o,i)=>
+    isMulti
+      ? `<button class="opt" data-i="${i}" onclick="reviewToggle(${i})"><span class="k">${String.fromCharCode(65+i)}</span> ${o.t}</button>`
+      : `<button class="opt" data-i="${i}" data-c="${o.correct?1:0}" onclick="reviewAnswerMc(${i})"><span class="k">${String.fromCharCode(65+i)}</span> ${o.t}</button>`
+  ).join('');
+
+  document.getElementById('reviewContainer').innerHTML = `
+    <div class="qbox" style="margin-top:0;">
+      <div class="qnum">錯題重練 · ${q.levelTitle||''}</div>
+      <h3>${q.q}</h3>
+      ${monitorHtml}
+      ${multiHint}
+      <div class="opts" id="reviewOpts">${optsHtml}</div>
+      <div id="reviewFb"></div>
+    </div>`;
+  document.getElementById('reviewActions').innerHTML = isMulti
+    ? `<button class="btn" id="reviewSubmitBtn" onclick="reviewSubmitMulti()">送出 ${icon('check')}</button>
+       <button class="btn secondary" onclick="showFinal()">${icon('arrow-left')} 結束重練</button>`
+    : `<button class="btn secondary" onclick="showFinal()">${icon('arrow-left')} 結束重練</button>`;
+  REVIEW.picked = [];
+}
+
+function reviewAnswerMc(i){
+  if(REVIEW.answered) return;
+  REVIEW.answered = true;
+  const q = REVIEW.queue[REVIEW.idx];
+  document.querySelectorAll('#reviewOpts .opt').forEach((b,idx)=>{
+    b.style.pointerEvents='none';
+    if(q.opts[idx].correct) b.classList.add('correct');
+    else if(idx===i) b.classList.add('wrong');
+  });
+  const isCorrect = !!q.opts[i].correct;
+  if(isCorrect) REVIEW.correct++;
+  reviewShowFb(isCorrect ? 'ok' : 'bad',
+    isCorrect ? '[[ok]]答對！這次處置符合指引。' : '[[bad]]仍需加強 — 正確選項已標示為綠色。',
+    q.evidence);
+}
+
+function reviewToggle(i){
+  if(REVIEW.answered) return;
+  REVIEW.picked = REVIEW.picked || [];
+  const idx = REVIEW.picked.indexOf(i);
+  const btn = document.querySelector(`#reviewOpts .opt[data-i="${i}"]`);
+  if(idx>=0){ REVIEW.picked.splice(idx,1); btn.classList.remove('sel'); }
+  else { REVIEW.picked.push(i); btn.classList.add('sel'); }
+}
+
+function reviewSubmitMulti(){
+  if(REVIEW.answered) return;
+  REVIEW.answered = true;
+  const q = REVIEW.queue[REVIEW.idx];
+  const picked = REVIEW.picked || [];
+  let rightPicks=0, wrongPicks=0, totalCorrect=0;
+  q.opts.forEach((o,i)=>{
+    const btn = document.querySelector(`#reviewOpts .opt[data-i="${i}"]`);
+    btn.style.pointerEvents='none';
+    if(o.correct){
+      totalCorrect++; btn.classList.add('correct');
+      if(picked.includes(i)) rightPicks++;
+    } else if(picked.includes(i)){
+      btn.classList.add('wrong'); wrongPicks++;
+    }
+  });
+  const perfect = (rightPicks===totalCorrect && wrongPicks===0);
+  if(perfect) REVIEW.correct++;
+  let grade, msg;
+  if(perfect){ grade='ok'; msg = q.fbOk || '[[ok]]完全正確！'; }
+  else if(wrongPicks>0 && rightPicks===0){ grade='bad'; msg = q.fbBad || '[[bad]]選擇有誤 — 正確選項已標示。'; }
+  else { grade='warn'; msg = q.fbPartial || '[[warn]]方向對，但有遺漏或多選 — 正確選項已標示。'; }
+  const sb = document.getElementById('reviewSubmitBtn'); if(sb) sb.disabled = true;
+  reviewShowFb(grade, msg, q.evidence);
+}
+
+function reviewShowFb(grade, msg, evidence){
+  const cls = grade==='ok'?'ok':grade==='warn'?'warn':'bad';
+  window.__ev = evidence;
+  const last = REVIEW.idx >= REVIEW.queue.length-1;
+  document.getElementById('reviewFb').innerHTML = `
+    <div class="feedback ${cls}" style="margin-top:14px;">${deico(msg)}
+      ${evidence?`<div><button class="evidence-btn" onclick='openModalEv()'>為什麼？ 證據 (Evidence) ${icon('arrow-right')}</button></div>`:''}
+    </div>`;
+  document.getElementById('reviewActions').innerHTML =
+    `<button class="btn" onclick="reviewNext()">${last?'看重練結果 '+icon('check'):'下一題 '+icon('arrow-right')}</button>`;
+}
+
+function reviewNext(){
+  REVIEW.idx++;
+  if(REVIEW.idx >= REVIEW.queue.length){ reviewFinish(); }
+  else { reviewRenderQ(); }
+}
+
+function reviewFinish(){
+  document.getElementById('reviewTitle').textContent = '重練結果 Review Result';
+  document.getElementById('reviewSub').textContent = '練習模式 — 不影響主線分數、徽章與解鎖。';
+  document.getElementById('reviewStat').innerHTML='';
+  document.getElementById('reviewContainer').innerHTML = `
+    <div class="rapid-result">
+      <div class="scorebig">${REVIEW.correct} <small style="font-size:20px;color:var(--muted);">/ ${REVIEW.total}</small></div>
+      <div style="text-align:center;color:var(--muted);font-size:13px;">本次重練答對 Correct</div>
+      <div class="rapid-grid">
+        <div class="cell"><div class="n">${REVIEW.total}</div><div class="l">重練題數 Reviewed</div></div>
+        <div class="cell"><div class="n">${REVIEW.correct}/${REVIEW.total}</div><div class="l">本次答對 Correct</div></div>
+      </div>
+      <div class="review">
+        <h4>${icon('clipboard')} 重練回顧</h4>
+        <div style="color:var(--muted);">${
+          REVIEW.correct===REVIEW.total
+            ? '全部答對！這些先前的弱點已掌握。'
+            : '仍有題目答錯，建議再練一次或回顧文獻庫鞏固觀念。'
+        }</div>
+        <div style="font-size:11.5px;color:var(--muted);margin-top:8px;">本模式僅供練習，分數獨立計算，不影響主線關卡解鎖與總分。</div>
+      </div>
+    </div>`;
+  document.getElementById('reviewActions').innerHTML = `
+    <button class="btn secondary" onclick="showFinal()">回最終結果 ${icon('arrow-right')}</button>
+    <button class="btn secondary" onclick="go('start')">回首頁 ${icon('arrow-right')}</button>
+    <button class="btn" onclick="startReview()">再練一次 ${icon('refresh')}</button>`;
+}
+
+// init
+updateHUD();
+</script>
+</body>
+</html>
